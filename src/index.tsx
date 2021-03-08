@@ -270,6 +270,7 @@ class DraggableFlatList<T> extends React.Component<
   constructor(props: DraggableFlatListProps<T>) {
     super(props);
     const { data, onRef } = props;
+    console.log("fired");
     data.forEach((item, index) => {
       const key = this.keyExtractor(item, index);
       this.keyToIndex.set(key, index);
