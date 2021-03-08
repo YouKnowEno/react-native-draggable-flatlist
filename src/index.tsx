@@ -158,7 +158,9 @@ class DraggableFlatList<T> extends React.Component<
   panGestureHandlerRef = React.createRef<PanGestureHandler>();
 
   componentDidMount() {
+    console.log("flingRef");
     console.log(this.props.flingRef);
+    console.log("panRef");
     console.log(this.props.panRef);
   }
 
@@ -1027,6 +1029,7 @@ class DraggableFlatList<T> extends React.Component<
         hitSlop={dragHitSlop}
         onGestureEvent={this.onPanGestureEvent}
         onHandlerStateChange={this.onPanStateChange}
+        waitFor={this.props.flingRef}
         {...dynamicProps}
       >
         <Animated.View
