@@ -100,6 +100,8 @@ export type DraggableFlatListProps<T> = Modify<
     autoscrollThreshold?: number;
     data: T[];
     onRef?: (ref: React.RefObject<AnimatedFlatListType<T>>) => void;
+    flingRef?: (ref: React.RefObject<T>) => void;
+    panRef?: (ref: React.RefObject<T>) => void;
     onDragBegin?: (index: number) => void;
     onRelease?: (index: number) => void;
     onDragEnd?: (params: DragEndParams<T>) => void;
@@ -154,6 +156,11 @@ class DraggableFlatList<T> extends React.Component<
   containerRef = React.createRef<Animated.View>();
   flatlistRef = React.createRef<AnimatedFlatListType<T>>();
   panGestureHandlerRef = React.createRef<PanGestureHandler>();
+
+  componentDidMount() {
+    console.log(this.props.flingRef);
+    console.log(this.props.panRef);
+  }
 
   containerSize = new Value<number>(0);
 
