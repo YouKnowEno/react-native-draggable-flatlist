@@ -15,7 +15,9 @@ import {
   FlatList,
   PanGestureHandlerProperties,
   PanGestureHandlerStateChangeEvent,
-  PanGestureHandlerGestureEvent
+  PanGestureHandlerGestureEvent,
+  FlingGestureHandler,
+  Directions
 } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import { springFill, setupCell } from "./procs";
@@ -100,8 +102,8 @@ export type DraggableFlatListProps<T> = Modify<
     autoscrollThreshold?: number;
     data: T[];
     onRef?: (ref: React.RefObject<AnimatedFlatListType<T>>) => void;
-    flingRef?: (ref: React.RefObject<T>) => void;
-    panRef?: (ref: React.RefObject<T>) => void;
+    // flingRef?: (ref: React.RefObject<T>) => void;
+    // panRef?: (ref: React.RefObject<T>) => void;
     onDragBegin?: (index: number) => void;
     onRelease?: (index: number) => void;
     onDragEnd?: (params: DragEndParams<T>) => void;
@@ -156,13 +158,7 @@ class DraggableFlatList<T> extends React.Component<
   containerRef = React.createRef<Animated.View>();
   flatlistRef = React.createRef<AnimatedFlatListType<T>>();
   panGestureHandlerRef = React.createRef<PanGestureHandler>();
-
-  componentDidMount() {
-    console.log("flingRef");
-    console.log(this.props.flingRef);
-    console.log("panRef");
-    console.log(this.props.panRef);
-  }
+  flingGestureHandlerRef = React.createRef<FlingGestureHandler>();
 
   containerSize = new Value<number>(0);
 
@@ -279,7 +275,8 @@ class DraggableFlatList<T> extends React.Component<
   constructor(props: DraggableFlatListProps<T>) {
     super(props);
     const { data, onRef } = props;
-    console.log("fired");
+    console.log(this.flingGestureHandlerRef);
+    console.log(this.panGestureHandlerRef);
     data.forEach((item, index) => {
       const key = this.keyExtractor(item, index);
       this.keyToIndex.set(key, index);
@@ -987,6 +984,10 @@ class DraggableFlatList<T> extends React.Component<
     );
   };
 
+  _onHorizontalFlingHandlerStateChange = () => {
+    console.log("fling");
+  };
+
   renderDebug() {
     return (
       <Animated.Code dependencies={[]}>
@@ -1024,76 +1025,84 @@ class DraggableFlatList<T> extends React.Component<
         : { activeOffsetY: activeOffset };
     }
     return (
-      <PanGestureHandler
-        ref={this.panGestureHandlerRef}
-        hitSlop={dragHitSlop}
-        onGestureEvent={this.onPanGestureEvent}
-        onHandlerStateChange={this.onPanStateChange}
-        waitFor={this.props.flingRef}
-        {...dynamicProps}
+      <FlingGestureHandler
+        ref={this.flingGestureHandlerRef}
+        simultaneousHandlers={this.panGestureHandlerRef}
+        direction={Directions.RIGHT | Directions.LEFT}
+        onHandlerStateChange={this._onHorizontalFlingHandlerStateChange}
       >
-        <Animated.View
-          style={[styles.flex, containerStyle]}
-          ref={this.containerRef}
-          onLayout={this.onContainerLayout}
-          onTouchEnd={this.onContainerTouchEnd}
+        <PanGestureHandler
+          ref={this.panGestureHandlerRef}
+          simultaneousHandlers={this.flingGestureHandlerRef}
+          hitSlop={dragHitSlop}
+          onGestureEvent={this.onPanGestureEvent}
+          onHandlerStateChange={this.onPanStateChange}
+          {...dynamicProps}
         >
-          {!!onPlaceholderIndexChange && this.renderOnPlaceholderIndexChange()}
-          {!!renderPlaceholder && this.renderPlaceholder()}
-          <AnimatedFlatList
-            {...this.props}
-            CellRendererComponent={this.CellRendererComponent}
-            ref={this.flatlistRef}
-            onContentSizeChange={this.onListContentSizeChange}
-            scrollEnabled={!hoverComponent && scrollEnabled}
-            renderItem={this.renderItem}
-            extraData={this.state}
-            keyExtractor={this.keyExtractor}
-            onScroll={this.onScroll}
-            scrollEventThrottle={1}
-          />
-          {!!hoverComponent && this.renderHoverComponent()}
-          <Animated.Code dependencies={[]}>
-            {() =>
-              block([
-                onChange(
-                  this.isPressedIn.native,
-                  cond(not(this.isPressedIn.native), this.onGestureRelease)
-                ),
-                // This onChange handles autoscroll checking BUT it also ensures that
-                // hover translation is continually evaluated. Removing it causes a flicker.
-                onChange(this.hoverComponentTranslate, this.checkAutoscroll),
-                cond(clockRunning(this.hoverClock), [
-                  spring(
-                    this.hoverClock,
-                    this.hoverAnimState,
-                    this.hoverAnimConfig
-                  ),
-                  cond(eq(this.hoverAnimState.finished, 1), [
-                    this.resetHoverSpring,
-                    stopClock(this.hoverClock),
-                    call(this.moveEndParams, this.onDragEnd),
-                    set(this.hasMoved, 0)
-                  ])
-                ])
-              ])
-            }
-          </Animated.Code>
-          {onScrollOffsetChange && (
+          <Animated.View
+            style={[styles.flex, containerStyle]}
+            ref={this.containerRef}
+            onLayout={this.onContainerLayout}
+            onTouchEnd={this.onContainerTouchEnd}
+          >
+            {!!onPlaceholderIndexChange &&
+              this.renderOnPlaceholderIndexChange()}
+            {!!renderPlaceholder && this.renderPlaceholder()}
+            <AnimatedFlatList
+              {...this.props}
+              CellRendererComponent={this.CellRendererComponent}
+              ref={this.flatlistRef}
+              onContentSizeChange={this.onListContentSizeChange}
+              scrollEnabled={!hoverComponent && scrollEnabled}
+              renderItem={this.renderItem}
+              extraData={this.state}
+              keyExtractor={this.keyExtractor}
+              onScroll={this.onScroll}
+              scrollEventThrottle={1}
+            />
+            {!!hoverComponent && this.renderHoverComponent()}
             <Animated.Code dependencies={[]}>
               {() =>
-                onChange(
-                  this.scrollOffset,
-                  call([this.scrollOffset], ([offset]) =>
-                    onScrollOffsetChange(offset)
-                  )
-                )
+                block([
+                  onChange(
+                    this.isPressedIn.native,
+                    cond(not(this.isPressedIn.native), this.onGestureRelease)
+                  ),
+                  // This onChange handles autoscroll checking BUT it also ensures that
+                  // hover translation is continually evaluated. Removing it causes a flicker.
+                  onChange(this.hoverComponentTranslate, this.checkAutoscroll),
+                  cond(clockRunning(this.hoverClock), [
+                    spring(
+                      this.hoverClock,
+                      this.hoverAnimState,
+                      this.hoverAnimConfig
+                    ),
+                    cond(eq(this.hoverAnimState.finished, 1), [
+                      this.resetHoverSpring,
+                      stopClock(this.hoverClock),
+                      call(this.moveEndParams, this.onDragEnd),
+                      set(this.hasMoved, 0)
+                    ])
+                  ])
+                ])
               }
             </Animated.Code>
-          )}
-          {!!this.props.debug && this.renderDebug()}
-        </Animated.View>
-      </PanGestureHandler>
+            {onScrollOffsetChange && (
+              <Animated.Code dependencies={[]}>
+                {() =>
+                  onChange(
+                    this.scrollOffset,
+                    call([this.scrollOffset], ([offset]) =>
+                      onScrollOffsetChange(offset)
+                    )
+                  )
+                }
+              </Animated.Code>
+            )}
+            {!!this.props.debug && this.renderDebug()}
+          </Animated.View>
+        </PanGestureHandler>
+      </FlingGestureHandler>
     );
   }
 }

@@ -7,7 +7,8 @@ import {
 } from "react-native";
 import {
   PanGestureHandler,
-  State as GestureState
+  State as GestureState,
+  FlingGestureHandler
 } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 declare const defaultProps: {
@@ -68,8 +69,6 @@ export declare type DraggableFlatListProps<T> = Modify<
     autoscrollThreshold?: number;
     data: T[];
     onRef?: (ref: React.RefObject<AnimatedFlatListType<T>>) => void;
-    flingRef?: (ref: React.RefObject<T>) => void;
-    panRef?: (ref: React.RefObject<T>) => void;
     onDragBegin?: (index: number) => void;
     onRelease?: (index: number) => void;
     onDragEnd?: (params: DragEndParams<T>) => void;
@@ -109,7 +108,7 @@ declare class DraggableFlatList<T> extends React.Component<
   containerRef: React.RefObject<Animated.View>;
   flatlistRef: React.RefObject<AnimatedFlatListType<T>>;
   panGestureHandlerRef: React.RefObject<PanGestureHandler>;
-  componentDidMount(): void;
+  flingGestureHandlerRef: React.RefObject<FlingGestureHandler>;
   containerSize: Animated.Value<number>;
   touchInit: Animated.Value<number>;
   activationDistance: Animated.Value<number>;
@@ -454,8 +453,6 @@ declare class DraggableFlatList<T> extends React.Component<
         onRef?:
           | ((ref: React.RefObject<AnimatedFlatListType<T>>) => void)
           | undefined;
-        flingRef?: ((ref: React.RefObject<T>) => void) | undefined;
-        panRef?: ((ref: React.RefObject<T>) => void) | undefined;
         onDragBegin?: ((index: number) => void) | undefined;
         onRelease?: ((index: number) => void) | undefined;
         onDragEnd?: ((params: DragEndParams<T>) => void) | undefined;
@@ -554,6 +551,7 @@ declare class DraggableFlatList<T> extends React.Component<
   renderOnPlaceholderIndexChange: () => JSX.Element;
   renderPlaceholder: () => JSX.Element | null;
   CellRendererComponent: (cellProps: any) => JSX.Element | null;
+  _onHorizontalFlingHandlerStateChange: () => void;
   renderDebug(): JSX.Element;
   onContainerTouchEnd: () => void;
   render(): JSX.Element;
