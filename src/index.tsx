@@ -160,6 +160,7 @@ class DraggableFlatList<T> extends React.Component<
   containerRef = React.createRef<Animated.View>();
   flatlistRef = React.createRef<AnimatedFlatListType<T>>();
   panGestureHandlerRef = React.createRef<PanGestureHandler>();
+  panGestureHandlerRef2 = React.createRef<PanGestureHandler>();
   flingGestureHandlerRef = React.createRef<FlingGestureHandler>();
 
   containerSize = new Value<number>(0);
@@ -277,10 +278,12 @@ class DraggableFlatList<T> extends React.Component<
   constructor(props: DraggableFlatListProps<T>) {
     super(props);
     const { data, onRef } = props;
-    console.log("flingGestureHandlerRef:");
-    console.log(this.flingGestureHandlerRef);
+    // console.log("flingGestureHandlerRef:");
+    // console.log(this.flingGestureHandlerRef);
     console.log("panGestureHandlerRef:");
     console.log(this.panGestureHandlerRef);
+    console.log("panGestureHandlerRef2:");
+    console.log(this.panGestureHandlerRef2);
     data.forEach((item, index) => {
       const key = this.keyExtractor(item, index);
       this.keyToIndex.set(key, index);
@@ -1084,14 +1087,15 @@ class DraggableFlatList<T> extends React.Component<
       //   onHandlerStateChange={this._onHorizontalFlingHandlerStateChange}
       // >
       <PanGestureHandler
+        ref={this.panGestureHandlerRef}
         // onGestureEvent={this.onHorizontalSwipeEvent}
         onHandlerStateChange={this.onHorizontalSwipeEvent}
       >
         <Animated.View style={styles.flex}>
           <PanGestureHandler
-            ref={this.panGestureHandlerRef}
+            ref={this.panGestureHandlerRef2}
             // simultaneousHandlers={this.flingGestureHandlerRef}
-            // waitFor={this.flingGestureHandlerRef}
+            waitFor={this.panGestureHandlerRef}
             hitSlop={dragHitSlop}
             onGestureEvent={this.onPanGestureEvent}
             onHandlerStateChange={this.onHorizontalSwipeEvent2}

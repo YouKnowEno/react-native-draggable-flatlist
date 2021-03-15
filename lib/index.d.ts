@@ -110,6 +110,7 @@ declare class DraggableFlatList<T> extends React.Component<
   containerRef: React.RefObject<Animated.View>;
   flatlistRef: React.RefObject<AnimatedFlatListType<T>>;
   panGestureHandlerRef: React.RefObject<PanGestureHandler>;
+  panGestureHandlerRef2: React.RefObject<PanGestureHandler>;
   flingGestureHandlerRef: React.RefObject<FlingGestureHandler>;
   containerSize: Animated.Value<number>;
   touchInit: Animated.Value<number>;
