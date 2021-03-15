@@ -557,6 +557,7 @@ declare class DraggableFlatList<T> extends React.Component<
     event: FlingGestureHandlerStateChangeEvent
   ) => void;
   onHorizontalSwipeEvent: (event: PanGestureHandlerGestureEvent) => void;
+  onHorizontalSwipeEvent2: (event: PanGestureHandlerGestureEvent) => void;
   renderDebug(): JSX.Element;
   onContainerTouchEnd: () => void;
   render(): JSX.Element;
