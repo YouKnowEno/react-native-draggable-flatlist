@@ -8,7 +8,8 @@ import {
 import {
   PanGestureHandler,
   State as GestureState,
-  FlingGestureHandler
+  FlingGestureHandler,
+  FlingGestureHandlerStateChangeEvent
 } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 declare const defaultProps: {
@@ -551,7 +552,9 @@ declare class DraggableFlatList<T> extends React.Component<
   renderOnPlaceholderIndexChange: () => JSX.Element;
   renderPlaceholder: () => JSX.Element | null;
   CellRendererComponent: (cellProps: any) => JSX.Element | null;
-  _onHorizontalFlingHandlerStateChange: () => void;
+  _onHorizontalFlingHandlerStateChange: (
+    event: FlingGestureHandlerStateChangeEvent
+  ) => void;
   renderDebug(): JSX.Element;
   onContainerTouchEnd: () => void;
   render(): JSX.Element;
