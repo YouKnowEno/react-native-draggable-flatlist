@@ -8,9 +8,7 @@ import {
 import {
   PanGestureHandler,
   State as GestureState,
-  PanGestureHandlerGestureEvent,
-  FlingGestureHandler,
-  FlingGestureHandlerStateChangeEvent
+  PanGestureHandlerGestureEvent
 } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 declare const defaultProps: {
@@ -111,13 +109,16 @@ declare class DraggableFlatList<T> extends React.Component<
   flatlistRef: React.RefObject<AnimatedFlatListType<T>>;
   panGestureHandlerRef: React.RefObject<PanGestureHandler>;
   panGestureHandlerRef2: React.RefObject<PanGestureHandler>;
-  flingGestureHandlerRef: React.RefObject<FlingGestureHandler>;
   containerSize: Animated.Value<number>;
   touchInit: Animated.Value<number>;
   activationDistance: Animated.Value<number>;
   touchAbsolute: Animated.Value<number>;
   panGestureState: Animated.Value<GestureState>;
   isPressedIn: {
+    native: Animated.Value<number>;
+    js: boolean;
+  };
+  isHorizontalSwiping: {
     native: Animated.Value<number>;
     js: boolean;
   };
@@ -554,14 +555,12 @@ declare class DraggableFlatList<T> extends React.Component<
   renderOnPlaceholderIndexChange: () => JSX.Element;
   renderPlaceholder: () => JSX.Element | null;
   CellRendererComponent: (cellProps: any) => JSX.Element | null;
-  _onHorizontalFlingHandlerStateChange: (
-    event: FlingGestureHandlerStateChangeEvent
-  ) => void;
+  onHorizontalSwipeStateChange: (event: PanGestureHandlerGestureEvent) => void;
   onHorizontalSwipeEvent: (event: PanGestureHandlerGestureEvent) => void;
-  onHorizontalSwipeStageChangeTester1: (
+  onHorizontalSwipeStateChangeTester1: (
     event: PanGestureHandlerGestureEvent
   ) => void;
-  onHorizontalSwipeStageChangeTester2: (
+  onHorizontalSwipeStateChangeTester2: (
     event: PanGestureHandlerGestureEvent
   ) => void;
   renderDebug(): JSX.Element;

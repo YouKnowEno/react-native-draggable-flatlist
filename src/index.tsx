@@ -15,11 +15,7 @@ import {
   FlatList,
   PanGestureHandlerProperties,
   PanGestureHandlerStateChangeEvent,
-  PanGestureHandlerGestureEvent,
-  FlingGestureHandler,
-  FlingGestureHandlerStateChangeEvent,
-  FlingGestureHandlerGestureEvent,
-  Directions
+  PanGestureHandlerGestureEvent
 } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 import { springFill, setupCell } from "./procs";
@@ -51,6 +47,7 @@ const {
   startClock,
   stopClock,
   spring,
+  useCode,
   defined,
   min,
   max,
@@ -161,7 +158,6 @@ class DraggableFlatList<T> extends React.Component<
   flatlistRef = React.createRef<AnimatedFlatListType<T>>();
   panGestureHandlerRef = React.createRef<PanGestureHandler>();
   panGestureHandlerRef2 = React.createRef<PanGestureHandler>();
-  flingGestureHandlerRef = React.createRef<FlingGestureHandler>();
 
   containerSize = new Value<number>(0);
 
@@ -171,6 +167,11 @@ class DraggableFlatList<T> extends React.Component<
   panGestureState = new Value(GestureState.UNDETERMINED);
 
   isPressedIn = {
+    native: new Value<number>(0),
+    js: false
+  };
+
+  isHorizontalSwiping = {
     native: new Value<number>(0),
     js: false
   };
@@ -278,12 +279,6 @@ class DraggableFlatList<T> extends React.Component<
   constructor(props: DraggableFlatListProps<T>) {
     super(props);
     const { data, onRef } = props;
-    // console.log("flingGestureHandlerRef:");
-    // console.log(this.flingGestureHandlerRef);
-    console.log("panGestureHandlerRef:");
-    console.log(this.panGestureHandlerRef);
-    console.log("panGestureHandlerRef2:");
-    console.log(this.panGestureHandlerRef2);
     data.forEach((item, index) => {
       const key = this.keyExtractor(item, index);
       this.keyToIndex.set(key, index);
@@ -992,59 +987,58 @@ class DraggableFlatList<T> extends React.Component<
     );
   };
 
-  _onHorizontalFlingHandlerStateChange = (
-    event: FlingGestureHandlerStateChangeEvent
-  ) => {
-    if (event.nativeEvent.state === GestureState.UNDETERMINED) {
-      console.log("fling UNDETERMINED");
-    } else if (event.nativeEvent.state === GestureState.FAILED) {
-      console.log("fling FAILED");
-    } else if (event.nativeEvent.state === GestureState.BEGAN) {
-      console.log("fling BEGAN");
-    } else if (event.nativeEvent.state === GestureState.CANCELLED) {
-      console.log("fling CANCELLED");
-    } else if (event.nativeEvent.state === GestureState.ACTIVE) {
-      console.log("fling ACTIVE");
+  onHorizontalSwipeStateChange = (event: PanGestureHandlerGestureEvent) => {
+    if (event.nativeEvent.state === GestureState.ACTIVE) {
+      console.log("pan ACTIVE");
+      this.isHorizontalSwiping.js = true;
     } else if (event.nativeEvent.state === GestureState.END) {
-      console.log("fling END");
+      this.isHorizontalSwiping.js = false;
     }
   };
 
   onHorizontalSwipeEvent = (event: PanGestureHandlerGestureEvent) => {
-    if (event.nativeEvent.x) {
-      console.log("pan UNDETERMINED");
-    } else if (event.nativeEvent.state === GestureState.FAILED) {
-      console.log("pan FAILED");
-    } else if (event.nativeEvent.state === GestureState.BEGAN) {
-      console.log("pan BEGAN");
-    } else if (event.nativeEvent.state === GestureState.CANCELLED) {
-      console.log("pan CANCELLED");
-    } else if (event.nativeEvent.state === GestureState.ACTIVE) {
-      console.log("pan ACTIVE");
-    } else if (event.nativeEvent.state === GestureState.END) {
-      console.log("pan END");
+    if (event.nativeEvent.x / 10 === 0) {
+      console.log("event.nativeEvent.x");
+      console.log(event.nativeEvent.x);
+      console.log("event.nativeEvent.absoluteX");
+      console.log(event.nativeEvent.absoluteX);
+      console.log("event.nativeEvent.translationX");
+      console.log(event.nativeEvent.translationX);
     }
+    // if (event.nativeEvent.x) {
+    //   console.log("pan UNDETERMINED");
+    // } else if (event.nativeEvent.state === GestureState.FAILED) {
+    //   console.log("pan FAILED");
+    // } else if (event.nativeEvent.state === GestureState.BEGAN) {
+    //   console.log("pan BEGAN");
+    // } else if (event.nativeEvent.state === GestureState.CANCELLED) {
+    //   console.log("pan CANCELLED");
+    // } else if (event.nativeEvent.state === GestureState.ACTIVE) {
+    //   console.log("pan ACTIVE");
+    // } else if (event.nativeEvent.state === GestureState.END) {
+    //   console.log("pan END");
+    // }
   };
 
-  onHorizontalSwipeStageChangeTester1 = (
+  onHorizontalSwipeStateChangeTester1 = (
     event: PanGestureHandlerGestureEvent
   ) => {
     if (event.nativeEvent.state === GestureState.UNDETERMINED) {
-      console.log("pan UNDETERMINED");
+      console.log("pan1 UNDETERMINED");
     } else if (event.nativeEvent.state === GestureState.FAILED) {
-      console.log("pan FAILED");
+      console.log("pan1 FAILED");
     } else if (event.nativeEvent.state === GestureState.BEGAN) {
-      console.log("pan BEGAN");
+      console.log("pan1 BEGAN");
     } else if (event.nativeEvent.state === GestureState.CANCELLED) {
-      console.log("pan CANCELLED");
+      console.log("pan1 CANCELLED");
     } else if (event.nativeEvent.state === GestureState.ACTIVE) {
-      console.log("pan ACTIVE");
+      console.log("pan1 ACTIVE");
     } else if (event.nativeEvent.state === GestureState.END) {
-      console.log("pan END");
+      console.log("pan1 END");
     }
   };
 
-  onHorizontalSwipeStageChangeTester2 = (
+  onHorizontalSwipeStateChangeTester2 = (
     event: PanGestureHandlerGestureEvent
   ) => {
     if (event.nativeEvent.state === GestureState.UNDETERMINED) {
@@ -1102,17 +1096,17 @@ class DraggableFlatList<T> extends React.Component<
       <PanGestureHandler
         ref={this.panGestureHandlerRef}
         simultaneousHandlers={this.panGestureHandlerRef2}
-        minDeltaX={20}
         onGestureEvent={this.onHorizontalSwipeEvent}
-        onHandlerStateChange={this.onHorizontalSwipeStageChangeTester1}
+        onHandlerStateChange={this.onHorizontalSwipeStateChangeTester1}
       >
         <Animated.View style={styles.flex}>
           <PanGestureHandler
             ref={this.panGestureHandlerRef2}
             simultaneousHandlers={this.panGestureHandlerRef}
+            enabled={!this.isHorizontalSwiping.js}
             hitSlop={dragHitSlop}
             onGestureEvent={this.onPanGestureEvent}
-            onHandlerStateChange={this.onHorizontalSwipeStageChangeTester2}
+            onHandlerStateChange={this.onHorizontalSwipeStateChangeTester2}
             // onHandlerStateChange={this.onPanStateChange}
             {...dynamicProps}
           >
