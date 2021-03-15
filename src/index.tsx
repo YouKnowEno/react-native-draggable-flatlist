@@ -1039,7 +1039,7 @@ class DraggableFlatList<T> extends React.Component<
       <FlingGestureHandler
         // ref={this.flingGestureHandlerRef}
         // simultaneousHandlers={this.panGestureHandlerRef}
-        // direction={Directions.RIGHT | Directions.LEFT}
+        direction={Directions.RIGHT | Directions.LEFT}
         // onGestureEvent={this._onHorizontalFlingHandlerStateChange(this.state)}
         onHandlerStateChange={this._onHorizontalFlingHandlerStateChange}
       >
