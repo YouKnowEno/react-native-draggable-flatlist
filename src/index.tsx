@@ -1011,6 +1011,24 @@ class DraggableFlatList<T> extends React.Component<
   };
 
   onHorizontalSwipeEvent = (event: PanGestureHandlerGestureEvent) => {
+    if (event.nativeEvent.x) {
+      console.log("pan UNDETERMINED");
+    } else if (event.nativeEvent.state === GestureState.FAILED) {
+      console.log("pan FAILED");
+    } else if (event.nativeEvent.state === GestureState.BEGAN) {
+      console.log("pan BEGAN");
+    } else if (event.nativeEvent.state === GestureState.CANCELLED) {
+      console.log("pan CANCELLED");
+    } else if (event.nativeEvent.state === GestureState.ACTIVE) {
+      console.log("pan ACTIVE");
+    } else if (event.nativeEvent.state === GestureState.END) {
+      console.log("pan END");
+    }
+  };
+
+  onHorizontalSwipeStageChangeTester1 = (
+    event: PanGestureHandlerGestureEvent
+  ) => {
     if (event.nativeEvent.state === GestureState.UNDETERMINED) {
       console.log("pan UNDETERMINED");
     } else if (event.nativeEvent.state === GestureState.FAILED) {
@@ -1026,7 +1044,9 @@ class DraggableFlatList<T> extends React.Component<
     }
   };
 
-  onHorizontalSwipeEvent2 = (event: PanGestureHandlerGestureEvent) => {
+  onHorizontalSwipeStageChangeTester2 = (
+    event: PanGestureHandlerGestureEvent
+  ) => {
     if (event.nativeEvent.state === GestureState.UNDETERMINED) {
       console.log("pan2 UNDETERMINED");
     } else if (event.nativeEvent.state === GestureState.FAILED) {
@@ -1079,27 +1099,20 @@ class DraggableFlatList<T> extends React.Component<
         : { activeOffsetY: activeOffset };
     }
     return (
-      // <FlingGestureHandler
-      //   ref={this.flingGestureHandlerRef}
-      //   // simultaneousHandlers={this.panGestureHandlerRef}
-      //   direction={Directions.RIGHT | Directions.LEFT}
-      //   // onGestureEvent={this._onHorizontalFlingHandlerStateChange(this.state)}
-      //   onHandlerStateChange={this._onHorizontalFlingHandlerStateChange}
-      // >
       <PanGestureHandler
         ref={this.panGestureHandlerRef}
         simultaneousHandlers={this.panGestureHandlerRef2}
-        // onGestureEvent={this.onHorizontalSwipeEvent}
-        onHandlerStateChange={this.onHorizontalSwipeEvent}
+        minDeltaX={20}
+        onGestureEvent={this.onHorizontalSwipeEvent}
+        onHandlerStateChange={this.onHorizontalSwipeStageChangeTester1}
       >
         <Animated.View style={styles.flex}>
           <PanGestureHandler
             ref={this.panGestureHandlerRef2}
             simultaneousHandlers={this.panGestureHandlerRef}
-            // waitFor={this.panGestureHandlerRef}
             hitSlop={dragHitSlop}
             onGestureEvent={this.onPanGestureEvent}
-            onHandlerStateChange={this.onHorizontalSwipeEvent2}
+            onHandlerStateChange={this.onHorizontalSwipeStageChangeTester2}
             // onHandlerStateChange={this.onPanStateChange}
             {...dynamicProps}
           >
@@ -1171,7 +1184,6 @@ class DraggableFlatList<T> extends React.Component<
           </PanGestureHandler>
         </Animated.View>
       </PanGestureHandler>
-      // </FlingGestureHandler>
     );
   }
 }
