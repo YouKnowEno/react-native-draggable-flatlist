@@ -17,6 +17,8 @@ import {
   PanGestureHandlerStateChangeEvent,
   PanGestureHandlerGestureEvent,
   FlingGestureHandler,
+  FlingGestureHandlerStateChangeEvent,
+  FlingGestureHandlerGestureEvent,
   Directions
 } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
@@ -275,7 +277,9 @@ class DraggableFlatList<T> extends React.Component<
   constructor(props: DraggableFlatListProps<T>) {
     super(props);
     const { data, onRef } = props;
+    console.log("flingGestureHandlerRef:");
     console.log(this.flingGestureHandlerRef);
+    console.log("panGestureHandlerRef:");
     console.log(this.panGestureHandlerRef);
     data.forEach((item, index) => {
       const key = this.keyExtractor(item, index);
@@ -811,6 +815,7 @@ class DraggableFlatList<T> extends React.Component<
             set(
               this.activationDistance,
               sub(this.props.horizontal ? x : y, this.touchInit)
+              // Calc distance between touchInit and absolute position of x/y
             ),
             set(this.touchAbsolute, this.props.horizontal ? x : y)
           ]),
@@ -984,8 +989,14 @@ class DraggableFlatList<T> extends React.Component<
     );
   };
 
-  _onHorizontalFlingHandlerStateChange = () => {
-    console.log("fling");
+  _onHorizontalFlingHandlerStateChange = (
+    event: FlingGestureHandlerStateChangeEvent
+  ) => {
+    if (event.nativeEvent.state === GestureState.ACTIVE) {
+      console.log("fling is Active");
+    } else {
+      console.log("fling is Not Active");
+    }
   };
 
   renderDebug() {
@@ -1026,14 +1037,15 @@ class DraggableFlatList<T> extends React.Component<
     }
     return (
       <FlingGestureHandler
-        ref={this.flingGestureHandlerRef}
-        simultaneousHandlers={this.panGestureHandlerRef}
-        direction={Directions.RIGHT | Directions.LEFT}
+        // ref={this.flingGestureHandlerRef}
+        // simultaneousHandlers={this.panGestureHandlerRef}
+        // direction={Directions.RIGHT | Directions.LEFT}
+        // onGestureEvent={this._onHorizontalFlingHandlerStateChange(this.state)}
         onHandlerStateChange={this._onHorizontalFlingHandlerStateChange}
       >
         <PanGestureHandler
           ref={this.panGestureHandlerRef}
-          simultaneousHandlers={this.flingGestureHandlerRef}
+          // simultaneousHandlers={this.flingGestureHandlerRef}
           hitSlop={dragHitSlop}
           onGestureEvent={this.onPanGestureEvent}
           onHandlerStateChange={this.onPanStateChange}
