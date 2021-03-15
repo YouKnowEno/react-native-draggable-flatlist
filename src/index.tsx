@@ -992,10 +992,18 @@ class DraggableFlatList<T> extends React.Component<
   _onHorizontalFlingHandlerStateChange = (
     event: FlingGestureHandlerStateChangeEvent
   ) => {
-    if (event.nativeEvent.state === GestureState.ACTIVE) {
-      console.log("fling is Active");
-    } else {
-      console.log("fling is Not Active");
+    if (event.nativeEvent.state === GestureState.UNDETERMINED) {
+      console.log("fling UNDETERMINED");
+    } else if (event.nativeEvent.state === GestureState.FAILED) {
+      console.log("fling FAILED");
+    } else if (event.nativeEvent.state === GestureState.BEGAN) {
+      console.log("fling BEGAN");
+    } else if (event.nativeEvent.state === GestureState.CANCELLED) {
+      console.log("fling CANCELLED");
+    } else if (event.nativeEvent.state === GestureState.ACTIVE) {
+      console.log("fling ACTIVE");
+    } else if (event.nativeEvent.state === GestureState.END) {
+      console.log("fling END");
     }
   };
 
