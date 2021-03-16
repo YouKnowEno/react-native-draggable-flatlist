@@ -1255,8 +1255,8 @@ class DraggableFlatList<T> extends React.Component<
               block([
                 onChange(
                   this.touchAbsolute2,
-                  call([this.touchAbsolute2], () => {
-                    console.log("onChangeFired");
+                  call([this.touchAbsolute2], touchAbsolute2 => {
+                    console.log("touchAbsolute: " + touchAbsolute2[0]);
                   })
                 )
               ])
