@@ -1019,9 +1019,9 @@ class DraggableFlatList<T> extends React.Component<
   };
 
   onHorizontalSwipeEvent = (event: PanGestureHandlerGestureEvent) => {
-    set(this.touchAbsolute, event.nativeEvent.x);
-    set(this.touchInit, this.touchAbsolute);
-    console.log("distance");
+    // set(this.touchAbsolute, event.nativeEvent.x);
+    // set(this.touchInit, this.touchAbsolute);
+    console.log("excaliber");
     // console.log(this.touchInit - event.nativeEvent.x);
     // console.log("event.nativeEvent.x");
     // console.log(event.nativeEvent.x);
