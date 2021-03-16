@@ -110,10 +110,13 @@ declare class DraggableFlatList<T> extends React.Component<
   panGestureHandlerRef: React.RefObject<PanGestureHandler>;
   panGestureHandlerRef2: React.RefObject<PanGestureHandler>;
   containerSize: Animated.Value<number>;
-  touchInit: Animated.Value<number>;
+  touchInit1: Animated.Value<number>;
+  touchInit2: Animated.Value<number>;
   activationDistance: Animated.Value<number>;
-  touchAbsolute: Animated.Value<number>;
-  panGestureState: Animated.Value<GestureState>;
+  touchAbsolute1: Animated.Value<number>;
+  touchAbsolute2: Animated.Value<number>;
+  panGestureState1: Animated.Value<GestureState>;
+  panGestureState2: Animated.Value<GestureState>;
   isPressedIn: {
     native: Animated.Value<number>;
     js: boolean;
@@ -546,6 +549,14 @@ declare class DraggableFlatList<T> extends React.Component<
   checkAutoscroll: Animated.Node<number>;
   onScroll: (...args: any[]) => void;
   onGestureRelease: Animated.Node<number>[];
+  onHorizontalSwipeStateChangeTester1: (
+    event: PanGestureHandlerGestureEvent
+  ) => void;
+  onHorizontalSwipeStateChangeTester2: (
+    event: PanGestureHandlerGestureEvent
+  ) => void;
+  onHorizontalSwipeStateChange: (...args: any[]) => void;
+  onHorizontalSwipeEvent: (...args: any[]) => void;
   onPanStateChange: (...args: any[]) => void;
   onPanGestureEvent: (...args: any[]) => void;
   hoverComponentTranslate: Animated.Node<number>;
@@ -555,14 +566,6 @@ declare class DraggableFlatList<T> extends React.Component<
   renderOnPlaceholderIndexChange: () => JSX.Element;
   renderPlaceholder: () => JSX.Element | null;
   CellRendererComponent: (cellProps: any) => JSX.Element | null;
-  onHorizontalSwipeStateChange: (event: PanGestureHandlerGestureEvent) => void;
-  onHorizontalSwipeEvent: (event: PanGestureHandlerGestureEvent) => void;
-  onHorizontalSwipeStateChangeTester1: (
-    event: PanGestureHandlerGestureEvent
-  ) => void;
-  onHorizontalSwipeStateChangeTester2: (
-    event: PanGestureHandlerGestureEvent
-  ) => void;
   renderDebug(): JSX.Element;
   onContainerTouchEnd: () => void;
   render(): JSX.Element;
