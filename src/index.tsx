@@ -796,6 +796,7 @@ class DraggableFlatList<T> extends React.Component<
       }: PanGestureHandlerStateChangeEvent["nativeEvent"]) =>
         cond(and(neq(state, this.panGestureState), not(this.disabled)), [
           cond(
+            //  Will
             or(
               eq(state, GestureState.BEGAN), // Called on press in on Android, NOT on ios!
               // GestureState.BEGAN may be skipped on fast swipes
@@ -835,15 +836,23 @@ class DraggableFlatList<T> extends React.Component<
 
   onPanGestureEvent = event([
     {
+      // get event data
       nativeEvent: ({ x, y }: PanGestureHandlerGestureEvent["nativeEvent"]) =>
+        // checks to see if all nodes are truthy
+        // 1. isHover | 2. panGestureState === ACTIVE | 3. Not disabled
         cond(
           and(
             this.isHovering,
             eq(this.panGestureState, GestureState.ACTIVE),
             not(this.disabled)
           ),
+          // Return node
           [
+            //  checks to see that hasMoved is false.
+            //  if so, sets hasMoved to 1
             cond(not(this.hasMoved), set(this.hasMoved, 1)),
+            // (not sure about this one)
+            //  in addition to setting hasMoved to 1, set touch absolute to Y value.
             [set(this.touchAbsolute, this.props.horizontal ? x : y)]
           ]
         )
@@ -987,6 +996,19 @@ class DraggableFlatList<T> extends React.Component<
     );
   };
 
+  // onHorizontalSwipeEvent = (event: PanGestureHandlerGestureEvent) => {
+  //   set(this.touchAbsolute, event.nativeEvent.x);
+  //   set(this.touchInit, this.touchAbsolute);
+  //   console.log("distance");
+  //   console.log(this.touchInit - event.nativeEvent.x);
+  //     // console.log("event.nativeEvent.x");
+  //     // console.log(event.nativeEvent.x);
+  //     // console.log("event.nativeEvent.absoluteX");
+  //     // console.log(event.nativeEvent.absoluteX);
+  //     // console.log("event.nativeEvent.translationX");
+  //     // console.log(event.nativeEvent.translationX);
+  // };
+
   onHorizontalSwipeStateChange = (event: PanGestureHandlerGestureEvent) => {
     if (event.nativeEvent.state === GestureState.ACTIVE) {
       console.log("pan ACTIVE");
@@ -997,27 +1019,16 @@ class DraggableFlatList<T> extends React.Component<
   };
 
   onHorizontalSwipeEvent = (event: PanGestureHandlerGestureEvent) => {
-    if (event.nativeEvent.x / 10 === 0) {
-      console.log("event.nativeEvent.x");
-      console.log(event.nativeEvent.x);
-      console.log("event.nativeEvent.absoluteX");
-      console.log(event.nativeEvent.absoluteX);
-      console.log("event.nativeEvent.translationX");
-      console.log(event.nativeEvent.translationX);
-    }
-    // if (event.nativeEvent.x) {
-    //   console.log("pan UNDETERMINED");
-    // } else if (event.nativeEvent.state === GestureState.FAILED) {
-    //   console.log("pan FAILED");
-    // } else if (event.nativeEvent.state === GestureState.BEGAN) {
-    //   console.log("pan BEGAN");
-    // } else if (event.nativeEvent.state === GestureState.CANCELLED) {
-    //   console.log("pan CANCELLED");
-    // } else if (event.nativeEvent.state === GestureState.ACTIVE) {
-    //   console.log("pan ACTIVE");
-    // } else if (event.nativeEvent.state === GestureState.END) {
-    //   console.log("pan END");
-    // }
+    set(this.touchAbsolute, event.nativeEvent.x);
+    set(this.touchInit, this.touchAbsolute);
+    console.log("distance");
+    // console.log(this.touchInit - event.nativeEvent.x);
+    // console.log("event.nativeEvent.x");
+    // console.log(event.nativeEvent.x);
+    // console.log("event.nativeEvent.absoluteX");
+    // console.log(event.nativeEvent.absoluteX);
+    // console.log("event.nativeEvent.translationX");
+    // console.log(event.nativeEvent.translationX);
   };
 
   onHorizontalSwipeStateChangeTester1 = (
