@@ -1270,6 +1270,9 @@ class DraggableFlatList<T> extends React.Component<
                             "horizontalSwipeGestureState: " +
                               horizontalSwipeGestureState
                           );
+                          console.log(
+                            "GestureState.ACTIVE: " + GestureState.ACTIVE
+                          );
                         }
                       )
                     )
