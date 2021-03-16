@@ -1198,8 +1198,8 @@ class DraggableFlatList<T> extends React.Component<
         enabled={!this.isHorizontalSwiping.js}
         hitSlop={dragHitSlop}
         onGestureEvent={this.onPanGestureEvent}
-        // onHandlerStateChange={this.onHorizontalSwipeStateChangeTester2}
-        onHandlerStateChange={this.onPanStateChange}
+        onHandlerStateChange={this.onHorizontalSwipeStateChangeTester2}
+        // onHandlerStateChange={this.onPanStateChange}
         {...dynamicProps}
       >
         <Animated.View
