@@ -859,7 +859,7 @@ class DraggableFlatList<T> extends React.Component<
           cond(eq(state, GestureState.ACTIVE), [
             // Calculates: Current x - hsTouchInit (initial x value)
             // Assigns difference to hsActivationDistance
-            set(this.hsActivationDistance, sub(x, this.hsTouchInit)),
+            // set(this.hsActivationDistance, sub(x, this.hsTouchInit)),
             // Assigns x value to hsTouchAbsolute
             set(this.hsTouchAbsolute, x)
           ]),
@@ -896,7 +896,11 @@ class DraggableFlatList<T> extends React.Component<
           // Return node
           [
             //  Assign x value to hsTouchAbsolute
-            set(this.hsTouchAbsolute, x)
+            set(this.hsTouchAbsolute, x),
+            set(
+              this.hsActivationDistance,
+              sub(this.hsTouchAbsolute, this.hsTouchInit)
+            )
           ]
         )
     }
