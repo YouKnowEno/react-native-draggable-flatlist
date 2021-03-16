@@ -72,7 +72,7 @@ const defaultProps = {
   animationConfig: defaultAnimationConfig as Animated.SpringConfig,
   scrollEnabled: true,
   dragHitSlop: 0 as PanGestureHandlerProperties["hitSlop"],
-  activationDistance: 0,
+  dragActivationDistance: 0,
   dragItemOverflow: false
 };
 
@@ -109,7 +109,7 @@ export type DraggableFlatListProps<T> = Modify<
     renderItem: (params: RenderItemParams<T>) => React.ReactNode;
     renderPlaceholder?: (params: { item: T; index: number }) => React.ReactNode;
     animationConfig: Partial<Animated.SpringConfig>;
-    activationDistance?: number;
+    dragActivationDistance?: number;
     debug?: boolean;
     layoutInvalidationKey?: string;
     onScrollOffsetChange?: (scrollOffset: number) => void;
@@ -163,7 +163,8 @@ class DraggableFlatList<T> extends React.Component<
 
   hsTouchInit = new Value<number>(0); // Position of initial touch
   dragTouchInit = new Value<number>(0); // Position of initial touch
-  activationDistance = new Value<number>(0); // Distance finger travels from initial touch to when dragging begins
+  hsActivationDistance = new Value<number>(0); // Distance finger travels from initial touch to when dragging begins
+  dragActivationDistance = new Value<number>(0); // Distance finger travels from initial touch to when dragging begins
   hsTouchAbsolute = new Value<number>(0); // Finger position on screen, relative to container
   dragTouchAbsolute = new Value<number>(0); // Finger position on screen, relative to container
   horizontalSwipeGestureState = new Value(GestureState.UNDETERMINED);
@@ -199,7 +200,7 @@ class DraggableFlatList<T> extends React.Component<
 
   touchCellOffset = sub(this.dragTouchInit, this.activeCellOffset); // Distance between touch point and edge of cell
   hoverAnimUnconstrained = sub(
-    sub(this.dragTouchAbsolute, this.activationDistance),
+    sub(this.dragTouchAbsolute, this.dragActivationDistance),
     this.touchCellOffset
   );
   hoverAnimConstrained = min(
@@ -254,7 +255,7 @@ class DraggableFlatList<T> extends React.Component<
     set(this.dragTouchAbsolute, this.hoverAnimConfig.toValue),
     set(this.dragTouchInit, 0),
     set(this.activeCellOffset, 0),
-    set(this.activationDistance, 0),
+    set(this.dragActivationDistance, 0),
     set(this.hoverAnimState.position, this.hoverAnimConfig.toValue),
     set(this.hoverAnimState.time, 0),
     set(this.hoverAnimState.finished, 0),
@@ -834,13 +835,12 @@ class DraggableFlatList<T> extends React.Component<
         x,
         y
       }: PanGestureHandlerStateChangeEvent["nativeEvent"]) =>
-        // checks to see if all nodes are truthy
-        // 1. state /== horizontalSwipeGestureState (UNDETERMINED)
+        // checks to see if state !== horizontalSwipeGestureState (UNDETERMINED)
         cond(neq(state, this.horizontalSwipeGestureState), [
           // checks to see if "or()" returns truthy
           cond(
             // checks to see if either node is truthy
-            // 1. state = BEGAN | 2. state is ACTIVE AND horizontalSwipeGestureState /== BEGAN
+            // 1. state = BEGAN | 2. state is ACTIVE AND horizontalSwipeGestureState !== BEGAN
             or(
               eq(state, GestureState.BEGAN), // Called on press in on Android, NOT on ios! GestureState.BEGAN may be skipped on fast swipes
               and(
@@ -848,25 +848,22 @@ class DraggableFlatList<T> extends React.Component<
                 neq(this.horizontalSwipeGestureState, GestureState.BEGAN)
               )
             ),
-            // Assigns y value to hsTouchAbsolute
+            // Assigns x value to hsTouchAbsolute
             // Assigns hsTouchAbsolute value to hsTouchInit
             [
-              set(this.hsTouchAbsolute, this.props.horizontal ? x : y),
+              set(this.hsTouchAbsolute, x),
               set(this.hsTouchInit, this.hsTouchAbsolute)
             ]
           ),
           // checks to see that state === ACTIVE
           cond(eq(state, GestureState.ACTIVE), [
-            // Calculates: Current y - touchInit (initial y value)
-            // Assigns difference to activationDistance
-            set(
-              this.activationDistance,
-              sub(this.props.horizontal ? x : y, this.hsTouchInit)
-            ),
-            // Assigns y value to hsTouchAbsolute
-            set(this.hsTouchAbsolute, this.props.horizontal ? x : y)
+            // Calculates: Current x - hsTouchInit (initial x value)
+            // Assigns difference to hsActivationDistance
+            set(this.hsActivationDistance, sub(x, this.hsTouchInit)),
+            // Assigns x value to hsTouchAbsolute
+            set(this.hsTouchAbsolute, x)
           ]),
-          // checks if horizontalSwipeGestureState /== state
+          // checks if horizontalSwipeGestureState !== state
           cond(
             neq(this.horizontalSwipeGestureState, state),
             // Assigns state value to horizontalSwipeGestureState
@@ -879,8 +876,11 @@ class DraggableFlatList<T> extends React.Component<
               eq(state, GestureState.CANCELLED),
               eq(state, GestureState.FAILED)
             ),
-            // runs onGestureRelease
-            this.onGestureRelease
+            call([], () => {
+              this.hsTouchAbsolute.setValue(0);
+              this.hsTouchInit.setValue(0);
+              this.hsActivationDistance.setValue(0);
+            })
           )
         ])
     }
@@ -889,23 +889,14 @@ class DraggableFlatList<T> extends React.Component<
   onHorizontalSwipeEvent = event([
     {
       // get event data
-      nativeEvent: ({ x, y }: PanGestureHandlerGestureEvent["nativeEvent"]) =>
-        // checks to see if all nodes are truthy
-        // 1. isHover | 2. horizontalSwipeGestureState === ACTIVE | 3. Not disabled
+      nativeEvent: ({ x }: PanGestureHandlerGestureEvent["nativeEvent"]) =>
+        // checks to see if horizontalSwipeGestureState === ACTIVE
         cond(
-          and(
-            this.isHovering,
-            eq(this.horizontalSwipeGestureState, GestureState.ACTIVE),
-            not(this.disabled)
-          ),
+          eq(this.horizontalSwipeGestureState, GestureState.ACTIVE),
           // Return node
           [
-            //  checks to see that hasMoved is false.
-            //  if so, sets hasMoved to 1
-            cond(not(this.hasMoved), set(this.hasMoved, 1)),
-            // (not sure about this one)
-            //  in addition to setting hasMoved to 1, set hsTouchAbsolute to Y value.
-            [set(this.hsTouchAbsolute, this.props.horizontal ? x : y)]
+            //  Assign x value to hsTouchAbsolute
+            set(this.hsTouchAbsolute, x)
           ]
         )
     }
@@ -933,12 +924,12 @@ class DraggableFlatList<T> extends React.Component<
         y
       }: PanGestureHandlerStateChangeEvent["nativeEvent"]) =>
         // checks to see if all nodes are truthy
-        // 1. state /== draggableGestureState (UNDETERMINED) | 2. Not disabled
+        // 1. state !== draggableGestureState (UNDETERMINED) | 2. Not disabled
         cond(and(neq(state, this.draggableGestureState), not(this.disabled)), [
           // checks to see if "or()" returns truthy
           cond(
             // checks to see if either node is truthy
-            // 1. state = BEGAN | 2. state is ACTIVE AND draggableGestureState /== BEGAN
+            // 1. state = BEGAN | 2. state is ACTIVE AND draggableGestureState !== BEGAN
             or(
               eq(state, GestureState.BEGAN), // Called on press in on Android, NOT on ios! GestureState.BEGAN may be skipped on fast swipes
               and(
@@ -956,15 +947,15 @@ class DraggableFlatList<T> extends React.Component<
           // checks to see that state === ACTIVE
           cond(eq(state, GestureState.ACTIVE), [
             // Calculates: Current y - dragTouchInit (initial y value)
-            // Assigns difference to activationDistance
+            // Assigns difference to dragActivationDistance
             set(
-              this.activationDistance,
+              this.dragActivationDistance,
               sub(this.props.horizontal ? x : y, this.dragTouchInit)
             ),
             // Assigns y value to dragTouchAbsolute
             set(this.dragTouchAbsolute, this.props.horizontal ? x : y)
           ]),
-          // checks if draggableGestureState /== state
+          // checks if draggableGestureState !== state
           cond(
             neq(this.draggableGestureState, state),
             // Assigns state value to panGestureState
@@ -1167,7 +1158,7 @@ class DraggableFlatList<T> extends React.Component<
       dragHitSlop,
       scrollEnabled,
       horizontal,
-      activationDistance,
+      dragActivationDistance,
       onScrollOffsetChange,
       renderPlaceholder,
       onPlaceholderIndexChange,
@@ -1176,105 +1167,114 @@ class DraggableFlatList<T> extends React.Component<
 
     const { hoverComponent } = this.state;
     let dynamicProps = {};
-    if (activationDistance) {
-      const activeOffset = [-activationDistance, activationDistance];
+    if (dragActivationDistance) {
+      const activeOffset = [-dragActivationDistance, dragActivationDistance];
       dynamicProps = horizontal
         ? { activeOffsetX: activeOffset }
         : { activeOffsetY: activeOffset };
     }
     return (
-      // <PanGestureHandler
-      //   ref={this.horizontalSwipeHandlerRef}
-      //   simultaneousHandlers={this.draggableHandlerRef}
-      //   onGestureEvent={this.onHorizontalSwipeEvent}
-      //   onHandlerStateChange={this.onHorizontalSwipeStateChange}
-      // >
-      //   <Animated.View style={styles.flex}>
       <PanGestureHandler
-        ref={this.draggableHandlerRef}
-        simultaneousHandlers={this.horizontalSwipeHandlerRef}
-        enabled={!this.isHorizontalSwiping.js}
-        hitSlop={dragHitSlop}
-        onGestureEvent={this.onDraggableGestureEvent}
-        onHandlerStateChange={this.onDraggableStateChange}
-        {...dynamicProps}
+        ref={this.horizontalSwipeHandlerRef}
+        simultaneousHandlers={this.draggableHandlerRef}
+        onGestureEvent={this.onHorizontalSwipeEvent}
+        onHandlerStateChange={this.onHorizontalSwipeStateChange}
       >
-        <Animated.View
-          style={[styles.flex, containerStyle]}
-          ref={this.containerRef}
-          onLayout={this.onContainerLayout}
-          onTouchEnd={this.onContainerTouchEnd}
-        >
-          {!!onPlaceholderIndexChange && this.renderOnPlaceholderIndexChange()}
-          {!!renderPlaceholder && this.renderPlaceholder()}
-          <AnimatedFlatList
-            {...this.props}
-            CellRendererComponent={this.CellRendererComponent}
-            ref={this.flatlistRef}
-            onContentSizeChange={this.onListContentSizeChange}
-            scrollEnabled={!hoverComponent && scrollEnabled}
-            renderItem={this.renderItem}
-            extraData={this.state}
-            keyExtractor={this.keyExtractor}
-            onScroll={this.onScroll}
-            scrollEventThrottle={1}
-          />
-          {!!hoverComponent && this.renderHoverComponent()}
-          <Animated.Code dependencies={[]}>
-            {() =>
-              block([
-                onChange(
-                  this.isPressedIn.native,
-                  cond(not(this.isPressedIn.native), this.onGestureRelease)
-                ),
-                // This onChange handles autoscroll checking BUT it also ensures that
-                // hover translation is continually evaluated. Removing it causes a flicker.
-                onChange(this.hoverComponentTranslate, this.checkAutoscroll),
-                cond(clockRunning(this.hoverClock), [
-                  spring(
-                    this.hoverClock,
-                    this.hoverAnimState,
-                    this.hoverAnimConfig
-                  ),
-                  cond(eq(this.hoverAnimState.finished, 1), [
-                    this.resetHoverSpring,
-                    stopClock(this.hoverClock),
-                    call(this.moveEndParams, this.onDragEnd),
-                    set(this.hasMoved, 0)
+        <Animated.View style={styles.flex}>
+          <PanGestureHandler
+            ref={this.draggableHandlerRef}
+            simultaneousHandlers={this.horizontalSwipeHandlerRef}
+            enabled={!this.isHorizontalSwiping.js}
+            hitSlop={dragHitSlop}
+            onGestureEvent={this.onDraggableGestureEvent}
+            onHandlerStateChange={this.onDraggableStateChange}
+            {...dynamicProps}
+          >
+            <Animated.View
+              style={[styles.flex, containerStyle]}
+              ref={this.containerRef}
+              onLayout={this.onContainerLayout}
+              onTouchEnd={this.onContainerTouchEnd}
+            >
+              {!!onPlaceholderIndexChange &&
+                this.renderOnPlaceholderIndexChange()}
+              {!!renderPlaceholder && this.renderPlaceholder()}
+              <AnimatedFlatList
+                {...this.props}
+                CellRendererComponent={this.CellRendererComponent}
+                ref={this.flatlistRef}
+                onContentSizeChange={this.onListContentSizeChange}
+                scrollEnabled={!hoverComponent && scrollEnabled}
+                renderItem={this.renderItem}
+                extraData={this.state}
+                keyExtractor={this.keyExtractor}
+                onScroll={this.onScroll}
+                scrollEventThrottle={1}
+              />
+              {!!hoverComponent && this.renderHoverComponent()}
+              <Animated.Code dependencies={[]}>
+                {() =>
+                  block([
+                    onChange(
+                      this.isPressedIn.native,
+                      cond(not(this.isPressedIn.native), this.onGestureRelease)
+                    ),
+                    // This onChange handles autoscroll checking BUT it also ensures that
+                    // hover translation is continually evaluated. Removing it causes a flicker.
+                    onChange(
+                      this.hoverComponentTranslate,
+                      this.checkAutoscroll
+                    ),
+                    cond(clockRunning(this.hoverClock), [
+                      spring(
+                        this.hoverClock,
+                        this.hoverAnimState,
+                        this.hoverAnimConfig
+                      ),
+                      cond(eq(this.hoverAnimState.finished, 1), [
+                        this.resetHoverSpring,
+                        stopClock(this.hoverClock),
+                        call(this.moveEndParams, this.onDragEnd),
+                        set(this.hasMoved, 0)
+                      ])
+                    ])
                   ])
-                ])
-              ])
-            }
-          </Animated.Code>
-          <Animated.Code>
-            {() =>
-              block([
-                onChange(
-                  this.activationDistance,
-                  call([this.activationDistance], ([activationDistance]) => {
-                    console.log("activationDistance: " + activationDistance);
-                  })
-                )
-              ])
-            }
-          </Animated.Code>
-          {onScrollOffsetChange && (
-            <Animated.Code dependencies={[]}>
-              {() =>
-                onChange(
-                  this.scrollOffset,
-                  call([this.scrollOffset], ([offset]) =>
-                    onScrollOffsetChange(offset)
-                  )
-                )
-              }
-            </Animated.Code>
-          )}
-          {!!this.props.debug && this.renderDebug()}
+                }
+              </Animated.Code>
+              <Animated.Code>
+                {() =>
+                  block([
+                    onChange(
+                      this.hsActivationDistance,
+                      call(
+                        [this.hsActivationDistance],
+                        ([hsActivationDistance]) => {
+                          console.log(
+                            "hsActivationDistance: " + hsActivationDistance
+                          );
+                        }
+                      )
+                    )
+                  ])
+                }
+              </Animated.Code>
+              {onScrollOffsetChange && (
+                <Animated.Code dependencies={[]}>
+                  {() =>
+                    onChange(
+                      this.scrollOffset,
+                      call([this.scrollOffset], ([offset]) =>
+                        onScrollOffsetChange(offset)
+                      )
+                    )
+                  }
+                </Animated.Code>
+              )}
+              {!!this.props.debug && this.renderDebug()}
+            </Animated.View>
+          </PanGestureHandler>
         </Animated.View>
       </PanGestureHandler>
-      //   </Animated.View>
-      // </PanGestureHandler>
     );
   }
 }

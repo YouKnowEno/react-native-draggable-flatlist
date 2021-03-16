@@ -43,7 +43,7 @@ declare const defaultProps: {
         bottom: number;
       }
     | undefined;
-  activationDistance: number;
+  dragActivationDistance: number;
   dragItemOverflow: boolean;
 };
 declare type DefaultProps = Readonly<typeof defaultProps>;
@@ -75,7 +75,7 @@ export declare type DraggableFlatListProps<T> = Modify<
     renderItem: (params: RenderItemParams<T>) => React.ReactNode;
     renderPlaceholder?: (params: { item: T; index: number }) => React.ReactNode;
     animationConfig: Partial<Animated.SpringConfig>;
-    activationDistance?: number;
+    dragActivationDistance?: number;
     debug?: boolean;
     layoutInvalidationKey?: string;
     onScrollOffsetChange?: (scrollOffset: number) => void;
@@ -112,7 +112,8 @@ declare class DraggableFlatList<T> extends React.Component<
   containerSize: Animated.Value<number>;
   hsTouchInit: Animated.Value<number>;
   dragTouchInit: Animated.Value<number>;
-  activationDistance: Animated.Value<number>;
+  hsActivationDistance: Animated.Value<number>;
+  dragActivationDistance: Animated.Value<number>;
   hsTouchAbsolute: Animated.Value<number>;
   dragTouchAbsolute: Animated.Value<number>;
   horizontalSwipeGestureState: Animated.Value<GestureState>;
@@ -445,7 +446,7 @@ declare class DraggableFlatList<T> extends React.Component<
           bottom: number;
         }
       | undefined;
-    activationDistance: number;
+    dragActivationDistance: number;
     dragItemOverflow: boolean;
   };
   constructor(props: DraggableFlatListProps<T>);
@@ -468,7 +469,7 @@ declare class DraggableFlatList<T> extends React.Component<
           | ((params: { item: T; index: number }) => React.ReactNode)
           | undefined;
         animationConfig: Partial<Animated.SpringConfig>;
-        activationDistance?: number | undefined;
+        dragActivationDistance?: number | undefined;
         debug?: boolean | undefined;
         layoutInvalidationKey?: string | undefined;
         onScrollOffsetChange?: ((scrollOffset: number) => void) | undefined;
@@ -510,7 +511,7 @@ declare class DraggableFlatList<T> extends React.Component<
                 bottom: number;
               }
             | undefined;
-          activationDistance: number;
+          dragActivationDistance: number;
           dragItemOverflow: boolean;
         }>
       >
