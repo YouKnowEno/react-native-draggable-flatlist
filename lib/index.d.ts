@@ -7,8 +7,7 @@ import {
 } from "react-native";
 import {
   PanGestureHandler,
-  State as GestureState,
-  PanGestureHandlerGestureEvent
+  State as GestureState
 } from "react-native-gesture-handler";
 import Animated from "react-native-reanimated";
 declare const defaultProps: {
@@ -550,12 +549,6 @@ declare class DraggableFlatList<T> extends React.Component<
   checkAutoscroll: Animated.Node<number>;
   onScroll: (...args: any[]) => void;
   onGestureRelease: Animated.Node<number>[];
-  onHorizontalSwipeStateChangeTester1: (
-    event: PanGestureHandlerGestureEvent
-  ) => void;
-  onHorizontalSwipeStateChangeTester2: (
-    event: PanGestureHandlerGestureEvent
-  ) => void;
   onHorizontalSwipeStateChange: (...args: any[]) => void;
   onHorizontalSwipeEvent: (...args: any[]) => void;
   onDraggableStateChange: (...args: any[]) => void;

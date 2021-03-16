@@ -824,7 +824,9 @@ class DraggableFlatList<T> extends React.Component<
             set(this.hsTouchAbsolute, x),
             call([], ([]) => {
               this.isHorizontalSwiping.js = true;
-              console.log("horizontalSwiping.js: " + this.isHorizontalSwiping);
+              console.log(
+                "horizontalSwiping.js: " + this.isHorizontalSwiping.js
+              );
               console.log("horizontalSwiping changed");
             })
           ]),
@@ -846,6 +848,9 @@ class DraggableFlatList<T> extends React.Component<
               this.hsTouchInit.setValue(0);
               this.hsActivationDistance.setValue(0);
               this.isHorizontalSwiping.js = false;
+              console.log(
+                "horizontalSwiping.js: " + this.isHorizontalSwiping.js
+              );
               console.log("reset horizontalSwipe");
             })
           )
@@ -1229,9 +1234,9 @@ class DraggableFlatList<T> extends React.Component<
                           console.log(
                             "draggableGestureState: " + draggableGestureState
                           );
-                          // console.log(
-                          //   "GestureState.ACTIVE: " + GestureState.ACTIVE
-                          // );
+                          console.log(
+                            "GestureState.ACTIVE: " + GestureState.ACTIVE
+                          );
                         }
                       )
                     )
