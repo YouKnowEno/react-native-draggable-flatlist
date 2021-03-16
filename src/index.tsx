@@ -1258,6 +1258,24 @@ class DraggableFlatList<T> extends React.Component<
                   ])
                 }
               </Animated.Code>
+              <Animated.Code>
+                {() =>
+                  block([
+                    onChange(
+                      this.horizontalSwipeGestureState,
+                      call(
+                        [this.horizontalSwipeGestureState],
+                        ([horizontalSwipeGestureState]) => {
+                          console.log(
+                            "horizontalSwipeGestureState: " +
+                              horizontalSwipeGestureState
+                          );
+                        }
+                      )
+                    )
+                  ])
+                }
+              </Animated.Code>
               {onScrollOffsetChange && (
                 <Animated.Code dependencies={[]}>
                   {() =>
