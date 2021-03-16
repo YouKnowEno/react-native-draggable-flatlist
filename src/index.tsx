@@ -349,6 +349,7 @@ class DraggableFlatList<T> extends React.Component<
     this.activeIndex.setValue(-1);
     this.spacerIndex.setValue(-1);
     this.dragTouchAbsolute.setValue(0);
+    this.isPressedIn.native.setValue(0);
     this.disabled.setValue(0);
     if (this.state.hoverComponent !== null || this.state.activeKey !== null) {
       this.setState({
@@ -385,7 +386,7 @@ class DraggableFlatList<T> extends React.Component<
   onRelease = ([index]: readonly number[]) => {
     const { onRelease } = this.props;
     this.isPressedIn.js = false;
-    this.isPressedIn.native.setValue(0);
+    // this.isPressedIn.native.setValue(0);
     onRelease && onRelease(index);
   };
 
