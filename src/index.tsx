@@ -951,8 +951,10 @@ class DraggableFlatList<T> extends React.Component<
             [
               set(this.touchAbsolute2, this.props.horizontal ? x : y),
               set(this.touchInit2, this.touchAbsolute2),
-              block([call([], () => console.log(this.touchAbsolute2))]),
-              block([call([], () => console.log(this.touchInit2))])
+              // block([call([], () => console.log(this.touchAbsolute2))]),
+              // block([call([], () => console.log(this.touchInit2))]),
+              block([call([], () => console.log("run run running"))]),
+              block([call([], () => console.log(y))])
             ]
           ),
           // checks to see that state === ACTIVE
@@ -1198,8 +1200,8 @@ class DraggableFlatList<T> extends React.Component<
         enabled={!this.isHorizontalSwiping.js}
         hitSlop={dragHitSlop}
         onGestureEvent={this.onPanGestureEvent}
-        onHandlerStateChange={this.onHorizontalSwipeStateChangeTester2}
-        // onHandlerStateChange={this.onPanStateChange}
+        // onHandlerStateChange={this.onHorizontalSwipeStateChangeTester2}
+        onHandlerStateChange={this.onPanStateChange}
         {...dynamicProps}
       >
         <Animated.View
