@@ -156,18 +156,18 @@ class DraggableFlatList<T> extends React.Component<
 
   containerRef = React.createRef<Animated.View>();
   flatlistRef = React.createRef<AnimatedFlatListType<T>>();
-  panGestureHandlerRef = React.createRef<PanGestureHandler>();
-  panGestureHandlerRef2 = React.createRef<PanGestureHandler>();
+  horizontalSwipeHandlerRef = React.createRef<PanGestureHandler>();
+  draggableHandlerRef = React.createRef<PanGestureHandler>();
 
   containerSize = new Value<number>(0);
 
-  touchInit1 = new Value<number>(0); // Position of initial touch
-  touchInit2 = new Value<number>(0); // Position of initial touch
+  hsTouchInit = new Value<number>(0); // Position of initial touch
+  dragTouchInit = new Value<number>(0); // Position of initial touch
   activationDistance = new Value<number>(0); // Distance finger travels from initial touch to when dragging begins
-  touchAbsolute1 = new Value<number>(0); // Finger position on screen, relative to container
-  touchAbsolute2 = new Value<number>(0); // Finger position on screen, relative to container
-  panGestureState1 = new Value(GestureState.UNDETERMINED);
-  panGestureState2 = new Value(GestureState.UNDETERMINED);
+  hsTouchAbsolute = new Value<number>(0); // Finger position on screen, relative to container
+  dragTouchAbsolute = new Value<number>(0); // Finger position on screen, relative to container
+  horizontalSwipeGestureState = new Value(GestureState.UNDETERMINED);
+  draggableGestureState = new Value(GestureState.UNDETERMINED);
 
   isPressedIn = {
     native: new Value<number>(0),
@@ -197,9 +197,9 @@ class DraggableFlatList<T> extends React.Component<
     this.scrollViewSize
   );
 
-  touchCellOffset = sub(this.touchInit2, this.activeCellOffset); // Distance between touch point and edge of cell
+  touchCellOffset = sub(this.dragTouchInit, this.activeCellOffset); // Distance between touch point and edge of cell
   hoverAnimUnconstrained = sub(
-    sub(this.touchAbsolute2, this.activationDistance),
+    sub(this.dragTouchAbsolute, this.activationDistance),
     this.touchCellOffset
   );
   hoverAnimConstrained = min(
@@ -251,8 +251,8 @@ class DraggableFlatList<T> extends React.Component<
   moveEndParams = [this.activeIndex, this.spacerIndex];
 
   resetHoverSpring = [
-    set(this.touchAbsolute2, this.hoverAnimConfig.toValue),
-    set(this.touchInit2, 0),
+    set(this.dragTouchAbsolute, this.hoverAnimConfig.toValue),
+    set(this.dragTouchInit, 0),
     set(this.activeCellOffset, 0),
     set(this.activationDistance, 0),
     set(this.hoverAnimState.position, this.hoverAnimConfig.toValue),
@@ -347,7 +347,7 @@ class DraggableFlatList<T> extends React.Component<
   resetHoverState = () => {
     this.activeIndex.setValue(-1);
     this.spacerIndex.setValue(-1);
-    this.touchAbsolute2.setValue(0);
+    this.dragTouchAbsolute.setValue(0);
     this.disabled.setValue(0);
     if (this.state.hoverComponent !== null || this.state.activeKey !== null) {
       this.setState({
@@ -723,7 +723,7 @@ class DraggableFlatList<T> extends React.Component<
       this.isAtEdge,
       not(and(this.isAtTopEdge, this.isScrolledUp)),
       not(and(this.isAtBottomEdge, this.isScrolledDown)),
-      eq(this.panGestureState2, GestureState.ACTIVE),
+      eq(this.draggableGestureState, GestureState.ACTIVE),
       not(this.isAutoScrollInProgress.native)
     ),
     call(this.autoscrollParams, this.autoscroll)
@@ -835,24 +835,24 @@ class DraggableFlatList<T> extends React.Component<
         y
       }: PanGestureHandlerStateChangeEvent["nativeEvent"]) =>
         // checks to see if all nodes are truthy
-        // 1. state /== panGestureState (UNDETERMINED)
-        cond(neq(state, this.panGestureState1), [
+        // 1. state /== horizontalSwipeGestureState (UNDETERMINED)
+        cond(neq(state, this.horizontalSwipeGestureState), [
           // checks to see if "or()" returns truthy
           cond(
             // checks to see if either node is truthy
-            // 1. state = BEGAN | 2. state is ACTIVE AND panGestureState /== BEGAN
+            // 1. state = BEGAN | 2. state is ACTIVE AND horizontalSwipeGestureState /== BEGAN
             or(
               eq(state, GestureState.BEGAN), // Called on press in on Android, NOT on ios! GestureState.BEGAN may be skipped on fast swipes
               and(
                 eq(state, GestureState.ACTIVE),
-                neq(this.panGestureState1, GestureState.BEGAN)
+                neq(this.horizontalSwipeGestureState, GestureState.BEGAN)
               )
             ),
-            // Assigns y value to touchAbsolute
-            // Assigns touchAbsolute value to touchInit
+            // Assigns y value to hsTouchAbsolute
+            // Assigns hsTouchAbsolute value to hsTouchInit
             [
-              set(this.touchAbsolute1, this.props.horizontal ? x : y),
-              set(this.touchInit1, this.touchAbsolute1)
+              set(this.hsTouchAbsolute, this.props.horizontal ? x : y),
+              set(this.hsTouchInit, this.hsTouchAbsolute)
             ]
           ),
           // checks to see that state === ACTIVE
@@ -861,16 +861,16 @@ class DraggableFlatList<T> extends React.Component<
             // Assigns difference to activationDistance
             set(
               this.activationDistance,
-              sub(this.props.horizontal ? x : y, this.touchInit1)
+              sub(this.props.horizontal ? x : y, this.hsTouchInit)
             ),
-            // Assigns y value to touchAbsolute
-            set(this.touchAbsolute1, this.props.horizontal ? x : y)
+            // Assigns y value to hsTouchAbsolute
+            set(this.hsTouchAbsolute, this.props.horizontal ? x : y)
           ]),
-          // checks if panGestureState /== state
+          // checks if horizontalSwipeGestureState /== state
           cond(
-            neq(this.panGestureState1, state),
-            // Assigns state value to panGestureState
-            set(this.panGestureState1, state)
+            neq(this.horizontalSwipeGestureState, state),
+            // Assigns state value to horizontalSwipeGestureState
+            set(this.horizontalSwipeGestureState, state)
           ),
           // checks if state === END, CANCELLED, or FAILED
           cond(
@@ -891,11 +891,11 @@ class DraggableFlatList<T> extends React.Component<
       // get event data
       nativeEvent: ({ x, y }: PanGestureHandlerGestureEvent["nativeEvent"]) =>
         // checks to see if all nodes are truthy
-        // 1. isHover | 2. panGestureState === ACTIVE | 3. Not disabled
+        // 1. isHover | 2. horizontalSwipeGestureState === ACTIVE | 3. Not disabled
         cond(
           and(
             this.isHovering,
-            eq(this.panGestureState1, GestureState.ACTIVE),
+            eq(this.horizontalSwipeGestureState, GestureState.ACTIVE),
             not(this.disabled)
           ),
           // Return node
@@ -904,8 +904,8 @@ class DraggableFlatList<T> extends React.Component<
             //  if so, sets hasMoved to 1
             cond(not(this.hasMoved), set(this.hasMoved, 1)),
             // (not sure about this one)
-            //  in addition to setting hasMoved to 1, set touch absolute to Y value.
-            [set(this.touchAbsolute1, this.props.horizontal ? x : y)]
+            //  in addition to setting hasMoved to 1, set hsTouchAbsolute to Y value.
+            [set(this.hsTouchAbsolute, this.props.horizontal ? x : y)]
           ]
         )
     }
@@ -924,7 +924,7 @@ class DraggableFlatList<T> extends React.Component<
   //     // console.log(event.nativeEvent.translationX);
   // };
 
-  onPanStateChange = event([
+  onDraggableStateChange = event([
     {
       // get event data
       nativeEvent: ({
@@ -933,45 +933,42 @@ class DraggableFlatList<T> extends React.Component<
         y
       }: PanGestureHandlerStateChangeEvent["nativeEvent"]) =>
         // checks to see if all nodes are truthy
-        // 1. state /== panGestureState (UNDETERMINED) | 2. Not disabled
-        cond(and(neq(state, this.panGestureState2), not(this.disabled)), [
+        // 1. state /== draggableGestureState (UNDETERMINED) | 2. Not disabled
+        cond(and(neq(state, this.draggableGestureState), not(this.disabled)), [
           // checks to see if "or()" returns truthy
           cond(
             // checks to see if either node is truthy
-            // 1. state = BEGAN | 2. state is ACTIVE AND panGestureState /== BEGAN
+            // 1. state = BEGAN | 2. state is ACTIVE AND draggableGestureState /== BEGAN
             or(
               eq(state, GestureState.BEGAN), // Called on press in on Android, NOT on ios! GestureState.BEGAN may be skipped on fast swipes
               and(
                 eq(state, GestureState.ACTIVE),
-                neq(this.panGestureState2, GestureState.BEGAN)
+                neq(this.draggableGestureState, GestureState.BEGAN)
               )
             ),
-            // Assigns y value to touchAbsolute
-            // Assigns touchAbsolute value to touchInit
+            // Assigns y value to dragTouchAbsolute
+            // Assigns dragTouchAbsolute value to dragTouchInit
             [
-              set(this.touchAbsolute2, this.props.horizontal ? x : y),
-              set(this.touchInit2, this.touchAbsolute2),
-              // block([call([], () => console.log(this.touchAbsolute2))]),
-              // block([call([], () => console.log(this.touchInit2))]),
-              block([call([], () => console.log("run run running"))])
+              set(this.dragTouchAbsolute, this.props.horizontal ? x : y),
+              set(this.dragTouchInit, this.dragTouchAbsolute)
             ]
           ),
           // checks to see that state === ACTIVE
           cond(eq(state, GestureState.ACTIVE), [
-            // Calculates: Current y - touchInit (initial y value)
+            // Calculates: Current y - dragTouchInit (initial y value)
             // Assigns difference to activationDistance
             set(
               this.activationDistance,
-              sub(this.props.horizontal ? x : y, this.touchInit2)
+              sub(this.props.horizontal ? x : y, this.dragTouchInit)
             ),
-            // Assigns y value to touchAbsolute
-            set(this.touchAbsolute2, this.props.horizontal ? x : y)
+            // Assigns y value to dragTouchAbsolute
+            set(this.dragTouchAbsolute, this.props.horizontal ? x : y)
           ]),
-          // checks if panGestureState /== state
+          // checks if draggableGestureState /== state
           cond(
-            neq(this.panGestureState2, state),
+            neq(this.draggableGestureState, state),
             // Assigns state value to panGestureState
-            set(this.panGestureState2, state)
+            set(this.draggableGestureState, state)
           ),
           // checks if state === END, CANCELLED, or FAILED
           cond(
@@ -987,16 +984,16 @@ class DraggableFlatList<T> extends React.Component<
     }
   ]);
 
-  onPanGestureEvent = event([
+  onDraggableGestureEvent = event([
     {
       // get event data
       nativeEvent: ({ x, y }: PanGestureHandlerGestureEvent["nativeEvent"]) =>
         // checks to see if all nodes are truthy
-        // 1. isHover | 2. panGestureState === ACTIVE | 3. Not disabled
+        // 1. isHover | 2. draggableGestureState === ACTIVE | 3. Not disabled
         cond(
           and(
             this.isHovering,
-            eq(this.panGestureState2, GestureState.ACTIVE),
+            eq(this.draggableGestureState, GestureState.ACTIVE),
             not(this.disabled)
           ),
           // Return node
@@ -1005,8 +1002,8 @@ class DraggableFlatList<T> extends React.Component<
             //  if so, sets hasMoved to 1
             cond(not(this.hasMoved), set(this.hasMoved, 1)),
             // (not sure about this one)
-            //  in addition to setting hasMoved to 1, set touch absolute to Y value.
-            [set(this.touchAbsolute2, this.props.horizontal ? x : y)]
+            //  in addition to setting hasMoved to 1, set dragTouchAbsolute to Y value.
+            [set(this.dragTouchAbsolute, this.props.horizontal ? x : y)]
           ]
         )
     }
@@ -1020,7 +1017,7 @@ class DraggableFlatList<T> extends React.Component<
 
   hoverComponentOpacity = and(
     this.isHovering,
-    neq(this.panGestureState2, GestureState.CANCELLED)
+    neq(this.draggableGestureState, GestureState.CANCELLED)
   );
 
   renderHoverComponent = () => {
@@ -1187,20 +1184,19 @@ class DraggableFlatList<T> extends React.Component<
     }
     return (
       // <PanGestureHandler
-      //   ref={this.panGestureHandlerRef}
-      //   simultaneousHandlers={this.panGestureHandlerRef2}
+      //   ref={this.horizontalSwipeHandlerRef}
+      //   simultaneousHandlers={this.draggableHandlerRef}
       //   onGestureEvent={this.onHorizontalSwipeEvent}
       //   onHandlerStateChange={this.onHorizontalSwipeStateChange}
       // >
       //   <Animated.View style={styles.flex}>
       <PanGestureHandler
-        ref={this.panGestureHandlerRef2}
-        simultaneousHandlers={this.panGestureHandlerRef}
+        ref={this.draggableHandlerRef}
+        simultaneousHandlers={this.horizontalSwipeHandlerRef}
         enabled={!this.isHorizontalSwiping.js}
         hitSlop={dragHitSlop}
-        onGestureEvent={this.onPanGestureEvent}
-        // onHandlerStateChange={this.onHorizontalSwipeStateChangeTester2}
-        onHandlerStateChange={this.onPanStateChange}
+        onGestureEvent={this.onDraggableGestureEvent}
+        onHandlerStateChange={this.onDraggableStateChange}
         {...dynamicProps}
       >
         <Animated.View

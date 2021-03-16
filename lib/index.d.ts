@@ -107,16 +107,16 @@ declare class DraggableFlatList<T> extends React.Component<
   state: State;
   containerRef: React.RefObject<Animated.View>;
   flatlistRef: React.RefObject<AnimatedFlatListType<T>>;
-  panGestureHandlerRef: React.RefObject<PanGestureHandler>;
-  panGestureHandlerRef2: React.RefObject<PanGestureHandler>;
+  horizontalSwipeHandlerRef: React.RefObject<PanGestureHandler>;
+  draggableHandlerRef: React.RefObject<PanGestureHandler>;
   containerSize: Animated.Value<number>;
-  touchInit1: Animated.Value<number>;
-  touchInit2: Animated.Value<number>;
+  hsTouchInit: Animated.Value<number>;
+  dragTouchInit: Animated.Value<number>;
   activationDistance: Animated.Value<number>;
-  touchAbsolute1: Animated.Value<number>;
-  touchAbsolute2: Animated.Value<number>;
-  panGestureState1: Animated.Value<GestureState>;
-  panGestureState2: Animated.Value<GestureState>;
+  hsTouchAbsolute: Animated.Value<number>;
+  dragTouchAbsolute: Animated.Value<number>;
+  horizontalSwipeGestureState: Animated.Value<GestureState>;
+  draggableGestureState: Animated.Value<GestureState>;
   isPressedIn: {
     native: Animated.Value<number>;
     js: boolean;
@@ -557,8 +557,8 @@ declare class DraggableFlatList<T> extends React.Component<
   ) => void;
   onHorizontalSwipeStateChange: (...args: any[]) => void;
   onHorizontalSwipeEvent: (...args: any[]) => void;
-  onPanStateChange: (...args: any[]) => void;
-  onPanGestureEvent: (...args: any[]) => void;
+  onDraggableStateChange: (...args: any[]) => void;
+  onDraggableGestureEvent: (...args: any[]) => void;
   hoverComponentTranslate: Animated.Node<number>;
   hoverComponentOpacity: Animated.Node<0 | 1>;
   renderHoverComponent: () => JSX.Element;
