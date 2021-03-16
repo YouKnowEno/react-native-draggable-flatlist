@@ -791,42 +791,6 @@ class DraggableFlatList<T> extends React.Component<
     )
   ];
 
-  onHorizontalSwipeStateChangeTester1 = (
-    event: PanGestureHandlerGestureEvent
-  ) => {
-    if (event.nativeEvent.state === GestureState.UNDETERMINED) {
-      console.log("pan1 UNDETERMINED");
-    } else if (event.nativeEvent.state === GestureState.FAILED) {
-      console.log("pan1 FAILED");
-    } else if (event.nativeEvent.state === GestureState.BEGAN) {
-      console.log("pan1 BEGAN");
-    } else if (event.nativeEvent.state === GestureState.CANCELLED) {
-      console.log("pan1 CANCELLED");
-    } else if (event.nativeEvent.state === GestureState.ACTIVE) {
-      console.log("pan1 ACTIVE");
-    } else if (event.nativeEvent.state === GestureState.END) {
-      console.log("pan1 END");
-    }
-  };
-
-  onHorizontalSwipeStateChangeTester2 = (
-    event: PanGestureHandlerGestureEvent
-  ) => {
-    if (event.nativeEvent.state === GestureState.UNDETERMINED) {
-      console.log("pan2 UNDETERMINED");
-    } else if (event.nativeEvent.state === GestureState.FAILED) {
-      console.log("pan2 FAILED");
-    } else if (event.nativeEvent.state === GestureState.BEGAN) {
-      console.log("pan2 BEGAN");
-    } else if (event.nativeEvent.state === GestureState.CANCELLED) {
-      console.log("pan2 CANCELLED");
-    } else if (event.nativeEvent.state === GestureState.ACTIVE) {
-      console.log("pan2 ACTIVE");
-    } else if (event.nativeEvent.state === GestureState.END) {
-      console.log("pan2 END");
-    }
-  };
-
   onHorizontalSwipeStateChange = event([
     {
       // get event data
@@ -857,11 +821,12 @@ class DraggableFlatList<T> extends React.Component<
           ),
           // checks to see that state === ACTIVE
           cond(eq(state, GestureState.ACTIVE), [
-            // Calculates: Current x - hsTouchInit (initial x value)
-            // Assigns difference to hsActivationDistance
-            // set(this.hsActivationDistance, sub(x, this.hsTouchInit)),
-            // Assigns x value to hsTouchAbsolute
-            set(this.hsTouchAbsolute, x)
+            set(this.hsTouchAbsolute, x),
+            call([], ([]) => {
+              this.isHorizontalSwiping.js = true;
+              console.log("horizontalSwiping.js: " + this.isHorizontalSwiping);
+              console.log("horizontalSwiping changed");
+            })
           ]),
           // checks if horizontalSwipeGestureState !== state
           cond(
@@ -880,6 +845,8 @@ class DraggableFlatList<T> extends React.Component<
               this.hsTouchAbsolute.setValue(0);
               this.hsTouchInit.setValue(0);
               this.hsActivationDistance.setValue(0);
+              this.isHorizontalSwiping.js = false;
+              console.log("reset horizontalSwipe");
             })
           )
         ])
@@ -897,6 +864,8 @@ class DraggableFlatList<T> extends React.Component<
           [
             //  Assign x value to hsTouchAbsolute
             set(this.hsTouchAbsolute, x),
+            // Calculates: Current x - hsTouchInit (initial x value)
+            // Assigns difference to hsActivationDistance
             set(
               this.hsActivationDistance,
               sub(this.hsTouchAbsolute, this.hsTouchInit)
@@ -905,19 +874,6 @@ class DraggableFlatList<T> extends React.Component<
         )
     }
   ]);
-
-  // onHorizontalSwipeEvent = (event: PanGestureHandlerGestureEvent) => {
-  //   set(this.touchAbsolute, event.nativeEvent.x);
-  //   set(this.touchInit, this.touchAbsolute);
-  //   console.log("distance");
-  //   console.log(this.touchInit - event.nativeEvent.x);
-  //     // console.log("event.nativeEvent.x");
-  //     // console.log(event.nativeEvent.x);
-  //     // console.log("event.nativeEvent.absoluteX");
-  //     // console.log(event.nativeEvent.absoluteX);
-  //     // console.log("event.nativeEvent.translationX");
-  //     // console.log(event.nativeEvent.translationX);
-  // };
 
   onDraggableStateChange = event([
     {
@@ -1245,38 +1201,37 @@ class DraggableFlatList<T> extends React.Component<
                   ])
                 }
               </Animated.Code>
+              {/*<Animated.Code>*/}
+              {/*  {() =>*/}
+              {/*    block([*/}
+              {/*      onChange(*/}
+              {/*        this.hsActivationDistance,*/}
+              {/*        call(*/}
+              {/*          [this.hsActivationDistance],*/}
+              {/*          ([hsActivationDistance]) => {*/}
+              {/*            console.log(*/}
+              {/*              "hsActivationDistance: " + hsActivationDistance*/}
+              {/*            );*/}
+              {/*          }*/}
+              {/*        )*/}
+              {/*      )*/}
+              {/*    ])*/}
+              {/*  }*/}
+              {/*</Animated.Code>*/}
               <Animated.Code>
                 {() =>
                   block([
                     onChange(
-                      this.hsActivationDistance,
+                      this.draggableGestureState,
                       call(
-                        [this.hsActivationDistance],
-                        ([hsActivationDistance]) => {
+                        [this.draggableGestureState],
+                        ([draggableGestureState]) => {
                           console.log(
-                            "hsActivationDistance: " + hsActivationDistance
+                            "draggableGestureState: " + draggableGestureState
                           );
-                        }
-                      )
-                    )
-                  ])
-                }
-              </Animated.Code>
-              <Animated.Code>
-                {() =>
-                  block([
-                    onChange(
-                      this.horizontalSwipeGestureState,
-                      call(
-                        [this.horizontalSwipeGestureState],
-                        ([horizontalSwipeGestureState]) => {
-                          console.log(
-                            "horizontalSwipeGestureState: " +
-                              horizontalSwipeGestureState
-                          );
-                          console.log(
-                            "GestureState.ACTIVE: " + GestureState.ACTIVE
-                          );
+                          // console.log(
+                          //   "GestureState.ACTIVE: " + GestureState.ACTIVE
+                          // );
                         }
                       )
                     )
