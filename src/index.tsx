@@ -958,7 +958,10 @@ class DraggableFlatList<T> extends React.Component<
                 call([this.touchAbsolute2], () =>
                   console.log(this.touchAbsolute2)
                 )
-              ])
+              ]),
+              call([this.touchAbsolute2], () =>
+                console.log(this.touchAbsolute2)
+              )
             ]
           ),
           // checks to see that state === ACTIVE
