@@ -862,9 +862,14 @@ class DraggableFlatList<T> extends React.Component<
     {
       // get event data
       nativeEvent: ({ x }: PanGestureHandlerGestureEvent["nativeEvent"]) =>
-        // checks to see if horizontalSwipeGestureState === ACTIVE
+        // checks to see if all nodes are truthy
+        // 1. horizontalSwipeGestureState === ACTIVE | 2. not pressed in
         cond(
-          eq(this.horizontalSwipeGestureState, GestureState.ACTIVE),
+          and(
+            neq(this.isPressedIn.native, 1),
+
+            eq(this.horizontalSwipeGestureState, GestureState.ACTIVE)
+          ),
           // Return node
           [
             //  Assign x value to hsTouchAbsolute
@@ -1206,36 +1211,16 @@ class DraggableFlatList<T> extends React.Component<
                   ])
                 }
               </Animated.Code>
-              {/*<Animated.Code>*/}
-              {/*  {() =>*/}
-              {/*    block([*/}
-              {/*      onChange(*/}
-              {/*        this.hsActivationDistance,*/}
-              {/*        call(*/}
-              {/*          [this.hsActivationDistance],*/}
-              {/*          ([hsActivationDistance]) => {*/}
-              {/*            console.log(*/}
-              {/*              "hsActivationDistance: " + hsActivationDistance*/}
-              {/*            );*/}
-              {/*          }*/}
-              {/*        )*/}
-              {/*      )*/}
-              {/*    ])*/}
-              {/*  }*/}
-              {/*</Animated.Code>*/}
               <Animated.Code>
                 {() =>
                   block([
                     onChange(
-                      this.draggableGestureState,
+                      this.hsActivationDistance,
                       call(
-                        [this.draggableGestureState],
-                        ([draggableGestureState]) => {
+                        [this.hsActivationDistance],
+                        ([hsActivationDistance]) => {
                           console.log(
-                            "draggableGestureState: " + draggableGestureState
-                          );
-                          console.log(
-                            "GestureState.ACTIVE: " + GestureState.ACTIVE
+                            "hsActivationDistance: " + hsActivationDistance
                           );
                         }
                       )
@@ -1243,6 +1228,26 @@ class DraggableFlatList<T> extends React.Component<
                   ])
                 }
               </Animated.Code>
+              {/*<Animated.Code>*/}
+              {/*  {() =>*/}
+              {/*    block([*/}
+              {/*      onChange(*/}
+              {/*        this.draggableGestureState,*/}
+              {/*        call(*/}
+              {/*          [this.draggableGestureState],*/}
+              {/*          ([draggableGestureState]) => {*/}
+              {/*            console.log(*/}
+              {/*              "draggableGestureState: " + draggableGestureState*/}
+              {/*            );*/}
+              {/*            console.log(*/}
+              {/*              "GestureState.ACTIVE: " + GestureState.ACTIVE*/}
+              {/*            );*/}
+              {/*          }*/}
+              {/*        )*/}
+              {/*      )*/}
+              {/*    ])*/}
+              {/*  }*/}
+              {/*</Animated.Code>*/}
               {onScrollOffsetChange && (
                 <Animated.Code dependencies={[]}>
                   {() =>
