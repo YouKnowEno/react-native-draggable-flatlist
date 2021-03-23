@@ -102,7 +102,7 @@ export type DraggableFlatListProps<T> = Modify<
     data: T[];
     onRef?: (ref: React.RefObject<AnimatedFlatListType<T>>) => void;
     onPanRef?: (ref: React.RefObject<PanGestureHandler>) => void;
-    horizFlatListRef?: RefObject<any>;
+    horizFlatListRef?: React.RefObject<any>;
     // horizFlatListRef?: (ref: React.RefObject<T>) => void;
     // panRef?: (ref: React.RefObject<T>) => void;
     onDragBegin?: (index: number) => void;

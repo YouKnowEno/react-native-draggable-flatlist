@@ -1,4 +1,4 @@
-import React, { RefObject } from "react";
+import React from "react";
 import {
   FlatListProps,
   ViewStyle,
@@ -69,7 +69,7 @@ export declare type DraggableFlatListProps<T> = Modify<
     data: T[];
     onRef?: (ref: React.RefObject<AnimatedFlatListType<T>>) => void;
     onPanRef?: (ref: React.RefObject<PanGestureHandler>) => void;
-    horizFlatListRef?: RefObject<any>;
+    horizFlatListRef?: React.RefObject<any>;
     onDragBegin?: (index: number) => void;
     onRelease?: (index: number) => void;
     onDragEnd?: (params: DragEndParams<T>) => void;
