@@ -1,4 +1,4 @@
-import React from "react";
+import React, { RefObject } from "react";
 import {
   FlatListProps,
   ViewStyle,
@@ -68,6 +68,7 @@ export declare type DraggableFlatListProps<T> = Modify<
     autoscrollThreshold?: number;
     data: T[];
     onRef?: (ref: React.RefObject<AnimatedFlatListType<T>>) => void;
+    horizFlatListRef?: RefObject<any>;
     onDragBegin?: (index: number) => void;
     onRelease?: (index: number) => void;
     onDragEnd?: (params: DragEndParams<T>) => void;
@@ -108,6 +109,7 @@ declare class DraggableFlatList<T> extends React.Component<
   flatlistRef: React.RefObject<AnimatedFlatListType<T>>;
   horizontalSwipeHandlerRef: React.RefObject<PanGestureHandler>;
   draggableHandlerRef: React.RefObject<PanGestureHandler>;
+  horizFlatListRef: React.RefObject<any> | undefined;
   containerSize: Animated.Value<number>;
   hsTouchInit: Animated.Value<number>;
   dragTouchInit: Animated.Value<number>;
@@ -460,6 +462,7 @@ declare class DraggableFlatList<T> extends React.Component<
         onRef?:
           | ((ref: React.RefObject<AnimatedFlatListType<T>>) => void)
           | undefined;
+        horizFlatListRef?: React.RefObject<any> | undefined;
         onDragBegin?: ((index: number) => void) | undefined;
         onRelease?: ((index: number) => void) | undefined;
         onDragEnd?: ((params: DragEndParams<T>) => void) | undefined;

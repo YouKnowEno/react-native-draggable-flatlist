@@ -1,4 +1,4 @@
-import React from "react";
+import React, { RefObject } from "react";
 import {
   Platform,
   StyleSheet,
@@ -101,7 +101,8 @@ export type DraggableFlatListProps<T> = Modify<
     autoscrollThreshold?: number;
     data: T[];
     onRef?: (ref: React.RefObject<AnimatedFlatListType<T>>) => void;
-    // flingRef?: (ref: React.RefObject<T>) => void;
+    horizFlatListRef?: RefObject<any>;
+    // horizFlatListRef?: (ref: React.RefObject<T>) => void;
     // panRef?: (ref: React.RefObject<T>) => void;
     onDragBegin?: (index: number) => void;
     onRelease?: (index: number) => void;
@@ -158,6 +159,7 @@ class DraggableFlatList<T> extends React.Component<
   flatlistRef = React.createRef<AnimatedFlatListType<T>>();
   horizontalSwipeHandlerRef = React.createRef<PanGestureHandler>();
   draggableHandlerRef = React.createRef<PanGestureHandler>();
+  horizFlatListRef = this.props.horizFlatListRef;
 
   containerSize = new Value<number>(0);
 
@@ -282,7 +284,8 @@ class DraggableFlatList<T> extends React.Component<
 
   constructor(props: DraggableFlatListProps<T>) {
     super(props);
-    const { data, onRef } = props;
+    const { data, onRef, horizFlatListRef } = props;
+    console.log("horizFlatListRef: " + horizFlatListRef);
     data.forEach((item, index) => {
       const key = this.keyExtractor(item, index);
       this.keyToIndex.set(key, index);
@@ -1144,127 +1147,124 @@ class DraggableFlatList<T> extends React.Component<
         : { activeOffsetY: activeOffset };
     }
     return (
+      // <PanGestureHandler
+      //   ref={this.horizontalSwipeHandlerRef}
+      //   simultaneousHandlers={this.draggableHandlerRef}
+      //   onGestureEvent={this.onHorizontalSwipeEvent}
+      //   onHandlerStateChange={this.onHorizontalSwipeStateChange}
+      // >
+      //   <Animated.View style={styles.flex}>
       <PanGestureHandler
-        ref={this.horizontalSwipeHandlerRef}
-        simultaneousHandlers={this.draggableHandlerRef}
-        onGestureEvent={this.onHorizontalSwipeEvent}
-        onHandlerStateChange={this.onHorizontalSwipeStateChange}
+        ref={this.draggableHandlerRef}
+        simultaneousHandlers={this.horizontalSwipeHandlerRef}
+        waitFor={this.horizFlatListRef}
+        enabled={!this.isHorizontalSwiping.js}
+        hitSlop={dragHitSlop}
+        onGestureEvent={this.onDraggableGestureEvent}
+        onHandlerStateChange={this.onDraggableStateChange}
+        {...dynamicProps}
       >
-        <Animated.View style={styles.flex}>
-          <PanGestureHandler
-            ref={this.draggableHandlerRef}
-            simultaneousHandlers={this.horizontalSwipeHandlerRef}
-            enabled={!this.isHorizontalSwiping.js}
-            hitSlop={dragHitSlop}
-            onGestureEvent={this.onDraggableGestureEvent}
-            onHandlerStateChange={this.onDraggableStateChange}
-            {...dynamicProps}
-          >
-            <Animated.View
-              style={[styles.flex, containerStyle]}
-              ref={this.containerRef}
-              onLayout={this.onContainerLayout}
-              onTouchEnd={this.onContainerTouchEnd}
-            >
-              {!!onPlaceholderIndexChange &&
-                this.renderOnPlaceholderIndexChange()}
-              {!!renderPlaceholder && this.renderPlaceholder()}
-              <AnimatedFlatList
-                {...this.props}
-                CellRendererComponent={this.CellRendererComponent}
-                ref={this.flatlistRef}
-                onContentSizeChange={this.onListContentSizeChange}
-                scrollEnabled={!hoverComponent && scrollEnabled}
-                renderItem={this.renderItem}
-                extraData={this.state}
-                keyExtractor={this.keyExtractor}
-                onScroll={this.onScroll}
-                scrollEventThrottle={1}
-              />
-              {!!hoverComponent && this.renderHoverComponent()}
-              <Animated.Code dependencies={[]}>
-                {() =>
-                  block([
-                    onChange(
-                      this.isPressedIn.native,
-                      cond(not(this.isPressedIn.native), this.onGestureRelease)
-                    ),
-                    // This onChange handles autoscroll checking BUT it also ensures that
-                    // hover translation is continually evaluated. Removing it causes a flicker.
-                    onChange(
-                      this.hoverComponentTranslate,
-                      this.checkAutoscroll
-                    ),
-                    cond(clockRunning(this.hoverClock), [
-                      spring(
-                        this.hoverClock,
-                        this.hoverAnimState,
-                        this.hoverAnimConfig
-                      ),
-                      cond(eq(this.hoverAnimState.finished, 1), [
-                        this.resetHoverSpring,
-                        stopClock(this.hoverClock),
-                        call(this.moveEndParams, this.onDragEnd),
-                        set(this.hasMoved, 0)
-                      ])
-                    ])
+        <Animated.View
+          style={[styles.flex, containerStyle]}
+          ref={this.containerRef}
+          onLayout={this.onContainerLayout}
+          onTouchEnd={this.onContainerTouchEnd}
+        >
+          {!!onPlaceholderIndexChange && this.renderOnPlaceholderIndexChange()}
+          {!!renderPlaceholder && this.renderPlaceholder()}
+          <AnimatedFlatList
+            {...this.props}
+            CellRendererComponent={this.CellRendererComponent}
+            ref={this.flatlistRef}
+            onContentSizeChange={this.onListContentSizeChange}
+            scrollEnabled={!hoverComponent && scrollEnabled}
+            renderItem={this.renderItem}
+            extraData={this.state}
+            keyExtractor={this.keyExtractor}
+            onScroll={this.onScroll}
+            scrollEventThrottle={1}
+          />
+          {!!hoverComponent && this.renderHoverComponent()}
+          <Animated.Code dependencies={[]}>
+            {() =>
+              block([
+                onChange(
+                  this.isPressedIn.native,
+                  cond(not(this.isPressedIn.native), this.onGestureRelease)
+                ),
+                // This onChange handles autoscroll checking BUT it also ensures that
+                // hover translation is continually evaluated. Removing it causes a flicker.
+                onChange(this.hoverComponentTranslate, this.checkAutoscroll),
+                cond(clockRunning(this.hoverClock), [
+                  spring(
+                    this.hoverClock,
+                    this.hoverAnimState,
+                    this.hoverAnimConfig
+                  ),
+                  cond(eq(this.hoverAnimState.finished, 1), [
+                    this.resetHoverSpring,
+                    stopClock(this.hoverClock),
+                    call(this.moveEndParams, this.onDragEnd),
+                    set(this.hasMoved, 0)
                   ])
-                }
-              </Animated.Code>
-              {/*<Animated.Code>*/}
-              {/*  {() =>*/}
-              {/*    block([*/}
-              {/*      onChange(*/}
-              {/*        this.hsActivationDistance,*/}
-              {/*        call(*/}
-              {/*          [this.hsActivationDistance],*/}
-              {/*          ([hsActivationDistance]) => {*/}
-              {/*            console.log(*/}
-              {/*              "hsActivationDistance: " + hsActivationDistance*/}
-              {/*            );*/}
-              {/*          }*/}
-              {/*        )*/}
-              {/*      )*/}
-              {/*    ])*/}
-              {/*  }*/}
-              {/*</Animated.Code>*/}
-              {/*<Animated.Code>*/}
-              {/*  {() =>*/}
-              {/*    block([*/}
-              {/*      onChange(*/}
-              {/*        this.draggableGestureState,*/}
-              {/*        call(*/}
-              {/*          [this.draggableGestureState],*/}
-              {/*          ([draggableGestureState]) => {*/}
-              {/*            console.log(*/}
-              {/*              "draggableGestureState: " + draggableGestureState*/}
-              {/*            );*/}
-              {/*            console.log(*/}
-              {/*              "GestureState.ACTIVE: " + GestureState.ACTIVE*/}
-              {/*            );*/}
-              {/*          }*/}
-              {/*        )*/}
-              {/*      )*/}
-              {/*    ])*/}
-              {/*  }*/}
-              {/*</Animated.Code>*/}
-              {onScrollOffsetChange && (
-                <Animated.Code dependencies={[]}>
-                  {() =>
-                    onChange(
-                      this.scrollOffset,
-                      call([this.scrollOffset], ([offset]) =>
-                        onScrollOffsetChange(offset)
-                      )
-                    )
-                  }
-                </Animated.Code>
-              )}
-              {!!this.props.debug && this.renderDebug()}
-            </Animated.View>
-          </PanGestureHandler>
+                ])
+              ])
+            }
+          </Animated.Code>
+          {/*<Animated.Code>*/}
+          {/*  {() =>*/}
+          {/*    block([*/}
+          {/*      onChange(*/}
+          {/*        this.hsActivationDistance,*/}
+          {/*        call(*/}
+          {/*          [this.hsActivationDistance],*/}
+          {/*          ([hsActivationDistance]) => {*/}
+          {/*            console.log(*/}
+          {/*              "hsActivationDistance: " + hsActivationDistance*/}
+          {/*            );*/}
+          {/*          }*/}
+          {/*        )*/}
+          {/*      )*/}
+          {/*    ])*/}
+          {/*  }*/}
+          {/*</Animated.Code>*/}
+          {/*<Animated.Code>*/}
+          {/*  {() =>*/}
+          {/*    block([*/}
+          {/*      onChange(*/}
+          {/*        this.draggableGestureState,*/}
+          {/*        call(*/}
+          {/*          [this.draggableGestureState],*/}
+          {/*          ([draggableGestureState]) => {*/}
+          {/*            console.log(*/}
+          {/*              "draggableGestureState: " + draggableGestureState*/}
+          {/*            );*/}
+          {/*            console.log(*/}
+          {/*              "GestureState.ACTIVE: " + GestureState.ACTIVE*/}
+          {/*            );*/}
+          {/*          }*/}
+          {/*        )*/}
+          {/*      )*/}
+          {/*    ])*/}
+          {/*  }*/}
+          {/*</Animated.Code>*/}
+          {onScrollOffsetChange && (
+            <Animated.Code dependencies={[]}>
+              {() =>
+                onChange(
+                  this.scrollOffset,
+                  call([this.scrollOffset], ([offset]) =>
+                    onScrollOffsetChange(offset)
+                  )
+                )
+              }
+            </Animated.Code>
+          )}
+          {!!this.props.debug && this.renderDebug()}
         </Animated.View>
       </PanGestureHandler>
+      // </Animated.View>
+      // </PanGestureHandler>
     );
   }
 }
