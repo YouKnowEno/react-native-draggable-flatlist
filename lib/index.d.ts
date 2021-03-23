@@ -68,6 +68,7 @@ export declare type DraggableFlatListProps<T> = Modify<
     autoscrollThreshold?: number;
     data: T[];
     onRef?: (ref: React.RefObject<AnimatedFlatListType<T>>) => void;
+    onPanRef?: (ref: React.RefObject<PanGestureHandler>) => void;
     horizFlatListRef?: RefObject<any>;
     onDragBegin?: (index: number) => void;
     onRelease?: (index: number) => void;
@@ -461,6 +462,9 @@ declare class DraggableFlatList<T> extends React.Component<
         data: T[];
         onRef?:
           | ((ref: React.RefObject<AnimatedFlatListType<T>>) => void)
+          | undefined;
+        onPanRef?:
+          | ((ref: React.RefObject<PanGestureHandler>) => void)
           | undefined;
         horizFlatListRef?: React.RefObject<any> | undefined;
         onDragBegin?: ((index: number) => void) | undefined;

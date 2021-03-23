@@ -101,6 +101,7 @@ export type DraggableFlatListProps<T> = Modify<
     autoscrollThreshold?: number;
     data: T[];
     onRef?: (ref: React.RefObject<AnimatedFlatListType<T>>) => void;
+    onPanRef?: (ref: React.RefObject<PanGestureHandler>) => void;
     horizFlatListRef?: RefObject<any>;
     // horizFlatListRef?: (ref: React.RefObject<T>) => void;
     // panRef?: (ref: React.RefObject<T>) => void;
@@ -284,13 +285,14 @@ class DraggableFlatList<T> extends React.Component<
 
   constructor(props: DraggableFlatListProps<T>) {
     super(props);
-    const { data, onRef, horizFlatListRef } = props;
-    console.log("horizFlatListRef: " + horizFlatListRef);
+    const { data, onRef, onPanRef, horizFlatListRef } = props;
+    console.log(horizFlatListRef);
     data.forEach((item, index) => {
       const key = this.keyExtractor(item, index);
       this.keyToIndex.set(key, index);
     });
     onRef && onRef(this.flatlistRef);
+    onPanRef && onPanRef(this.draggableHandlerRef);
   }
 
   dataKeysHaveChanged = (a: T[], b: T[]) => {
@@ -1156,8 +1158,8 @@ class DraggableFlatList<T> extends React.Component<
       //   <Animated.View style={styles.flex}>
       <PanGestureHandler
         ref={this.draggableHandlerRef}
-        simultaneousHandlers={this.horizontalSwipeHandlerRef}
-        waitFor={this.horizFlatListRef}
+        // simultaneousHandlers={this.horizontalSwipeHandlerRef}
+        simultaneousHandlers={this.horizFlatListRef}
         enabled={!this.isHorizontalSwiping.js}
         hitSlop={dragHitSlop}
         onGestureEvent={this.onDraggableGestureEvent}
