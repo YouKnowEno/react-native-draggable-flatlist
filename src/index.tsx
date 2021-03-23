@@ -826,10 +826,10 @@ class DraggableFlatList<T> extends React.Component<
             set(this.hsTouchAbsolute, x),
             call([], ([]) => {
               this.isHorizontalSwiping.js = true;
-              console.log(
-                "horizontalSwiping.js: " + this.isHorizontalSwiping.js
-              );
-              console.log("horizontalSwiping changed");
+              // console.log(
+              //   "horizontalSwiping.js: " + this.isHorizontalSwiping.js
+              // );
+              // console.log("horizontalSwiping changed");
             })
           ]),
           // checks if horizontalSwipeGestureState !== state
@@ -1211,23 +1211,23 @@ class DraggableFlatList<T> extends React.Component<
                   ])
                 }
               </Animated.Code>
-              <Animated.Code>
-                {() =>
-                  block([
-                    onChange(
-                      this.hsActivationDistance,
-                      call(
-                        [this.hsActivationDistance],
-                        ([hsActivationDistance]) => {
-                          console.log(
-                            "hsActivationDistance: " + hsActivationDistance
-                          );
-                        }
-                      )
-                    )
-                  ])
-                }
-              </Animated.Code>
+              {/*<Animated.Code>*/}
+              {/*  {() =>*/}
+              {/*    block([*/}
+              {/*      onChange(*/}
+              {/*        this.hsActivationDistance,*/}
+              {/*        call(*/}
+              {/*          [this.hsActivationDistance],*/}
+              {/*          ([hsActivationDistance]) => {*/}
+              {/*            console.log(*/}
+              {/*              "hsActivationDistance: " + hsActivationDistance*/}
+              {/*            );*/}
+              {/*          }*/}
+              {/*        )*/}
+              {/*      )*/}
+              {/*    ])*/}
+              {/*  }*/}
+              {/*</Animated.Code>*/}
               {/*<Animated.Code>*/}
               {/*  {() =>*/}
               {/*    block([*/}
