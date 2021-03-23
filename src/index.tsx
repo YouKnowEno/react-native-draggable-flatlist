@@ -850,9 +850,9 @@ class DraggableFlatList<T> extends React.Component<
               this.hsTouchInit.setValue(0);
               this.hsActivationDistance.setValue(0);
               this.isHorizontalSwiping.js = false;
-              console.log(
-                "horizontalSwiping.js: " + this.isHorizontalSwiping.js
-              );
+              // console.log(
+              //   "horizontalSwiping.js: " + this.isHorizontalSwiping.js
+              // );
             })
           )
         ])
